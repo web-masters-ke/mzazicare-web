@@ -32,7 +32,7 @@ const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
           "transition-all duration-300",
           hover && [
             "hover:scale-[1.02]",
-            "hover:border-white/20",
+            "hover:border-[var(--glass-border-hover)]",
             "cursor-pointer",
           ],
           glow && "hover:glow-accent",

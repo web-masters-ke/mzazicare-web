@@ -60,7 +60,7 @@ const stats = [
 
 export function TrustSafetyScene() {
   return (
-    <SceneWrapper id="trust" className="bg-zinc-950" overflow="hidden">
+    <SceneWrapper id="trust" className="bg-[var(--color-bg-secondary)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background Elements */}
         <GradientOrb
@@ -82,21 +82,21 @@ export function TrustSafetyScene() {
             <AnimatedText animation="fade-up">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-subtle">
                 <Shield className="w-4 h-4 text-brand-accent" />
-                <span className="text-sm text-white/70">
+                <span className="text-sm text-[var(--color-fg-muted)]">
                   Your Family&apos;s Safety First
                 </span>
               </div>
             </AnimatedText>
 
             <AnimatedText animation="fade-up" delay={100}>
-              <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+              <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] leading-tight">
                 Trust built on{" "}
                 <span className="text-brand-accent">transparency</span>
               </h2>
             </AnimatedText>
 
             <AnimatedText animation="fade-up" delay={200}>
-              <p className="text-xl text-white/60 leading-relaxed">
+              <p className="text-xl text-[var(--color-fg-muted)] leading-relaxed">
                 Every caregiver goes through our rigorous 7-step verification
                 process. We don&apos;t just check boxes—we ensure your loved ones are
                 in genuinely caring hands.
@@ -108,10 +108,10 @@ export function TrustSafetyScene() {
               <div className="grid grid-cols-3 gap-6 pt-6">
                 {stats.map((stat) => (
                   <div key={stat.label} className="text-center">
-                    <p className="text-3xl md:text-4xl font-bold text-white">
+                    <p className="text-3xl md:text-4xl font-bold text-[var(--color-fg)]">
                       {stat.value}
                     </p>
-                    <p className="text-sm text-white/50 mt-1">{stat.label}</p>
+                    <p className="text-sm text-[var(--color-fg-subtle)] mt-1">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -128,10 +128,10 @@ export function TrustSafetyScene() {
               >
                 <GlassCard variant="subtle" hover className="h-full p-5">
                   <feature.icon className="w-8 h-8 text-brand-accent mb-4" />
-                  <h3 className="text-base font-semibold text-white mb-2">
+                  <h3 className="text-base font-semibold text-[var(--color-fg)] mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-white/50 leading-relaxed">
+                  <p className="text-sm text-[var(--color-fg-subtle)] leading-relaxed">
                     {feature.description}
                   </p>
                 </GlassCard>

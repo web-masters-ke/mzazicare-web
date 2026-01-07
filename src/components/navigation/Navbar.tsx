@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlassButton } from "@/components/ui/GlassButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const navLinks = [
   { href: "#how-it-works", label: "How It Works" },
@@ -45,14 +46,14 @@ export function Navbar() {
           "fixed top-0 left-0 right-0 z-50",
           "transition-all duration-500",
           isScrolled
-            ? "py-3 glass border-b border-white/5"
+            ? "py-3 glass border-b border-[var(--glass-border)]"
             : "py-5 bg-transparent"
         )}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl font-bold text-white tracking-tight">
+            <span className="text-2xl font-bold text-[var(--color-fg)] tracking-tight">
               Mzazi<span className="text-brand-accent">Care</span>
             </span>
           </Link>
@@ -64,8 +65,8 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "text-sm font-medium text-white/70",
-                  "hover:text-white transition-colors duration-200",
+                  "text-sm font-medium text-[var(--color-fg-muted)]",
+                  "hover:text-[var(--color-fg)] transition-colors duration-200",
                   "relative",
                   "after:absolute after:bottom-[-4px] after:left-0",
                   "after:w-0 after:h-[2px] after:bg-brand-accent",
@@ -77,8 +78,9 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons & Theme Toggle */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <Link href="/login">
               <GlassButton variant="ghost" size="sm">
                 Sign In
@@ -91,15 +93,18 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Mobile: Theme Toggle & Menu Toggle */}
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              className="p-2 text-[var(--color-fg)] hover:bg-[var(--glass-bg)] rounded-lg transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -115,7 +120,7 @@ export function Navbar() {
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+          className="absolute inset-0 bg-[var(--color-bg)]/95 backdrop-blur-xl"
           onClick={() => setIsMobileMenuOpen(false)}
         />
 
@@ -134,7 +139,7 @@ export function Navbar() {
               key={link.href}
               href={link.href}
               className={cn(
-                "text-3xl font-medium text-white",
+                "text-3xl font-medium text-[var(--color-fg)]",
                 "hover:text-brand-accent transition-colors",
                 "transition-all duration-300",
                 isMobileMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"

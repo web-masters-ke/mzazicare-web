@@ -74,7 +74,7 @@ export function TestimonialsScene() {
   }, [nextTestimonial]);
 
   return (
-    <SceneWrapper id="testimonials" className="bg-zinc-950" overflow="hidden">
+    <SceneWrapper id="testimonials" className="bg-[var(--color-bg-secondary)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background */}
         <GradientOrb
@@ -98,7 +98,7 @@ export function TestimonialsScene() {
             </p>
           </AnimatedText>
           <AnimatedText animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
               Families who found{" "}
               <span className="text-brand-accent">peace of mind</span>
             </h2>
@@ -130,7 +130,7 @@ export function TestimonialsScene() {
                 </div>
 
                 {/* Quote */}
-                <blockquote className="text-xl md:text-2xl text-white/90 leading-relaxed mb-8 font-light">
+                <blockquote className="text-xl md:text-2xl text-[var(--color-fg)]/90 leading-relaxed mb-8 font-light">
                   &ldquo;{testimonials[activeIndex].content}&rdquo;
                 </blockquote>
 
@@ -143,10 +143,10 @@ export function TestimonialsScene() {
                       .join("")}
                   </div>
                   <div>
-                    <p className="font-semibold text-white">
+                    <p className="font-semibold text-[var(--color-fg)]">
                       {testimonials[activeIndex].author}
                     </p>
-                    <p className="text-sm text-white/50">
+                    <p className="text-sm text-[var(--color-fg-subtle)]">
                       {testimonials[activeIndex].role} •{" "}
                       {testimonials[activeIndex].location}
                     </p>
@@ -174,7 +174,7 @@ export function TestimonialsScene() {
                     "h-2 rounded-full transition-all duration-300",
                     activeIndex === index
                       ? "w-8 bg-brand-accent"
-                      : "w-2 bg-white/20 hover:bg-white/40"
+                      : "w-2 bg-[var(--glass-bg)] hover:bg-[var(--glass-bg-medium)]"
                   )}
                   aria-label={`Go to testimonial ${index + 1}`}
                 />
@@ -185,17 +185,17 @@ export function TestimonialsScene() {
             <div className="flex gap-2">
               <button
                 onClick={prevTestimonial}
-                className="p-3 rounded-full glass-subtle hover:bg-white/10 transition-colors"
+                className="p-3 rounded-full glass-subtle hover:bg-[var(--glass-bg)] transition-colors"
                 aria-label="Previous testimonial"
               >
-                <ChevronLeft className="w-5 h-5 text-white" />
+                <ChevronLeft className="w-5 h-5 text-[var(--color-fg)]" />
               </button>
               <button
                 onClick={nextTestimonial}
-                className="p-3 rounded-full glass-subtle hover:bg-white/10 transition-colors"
+                className="p-3 rounded-full glass-subtle hover:bg-[var(--glass-bg)] transition-colors"
                 aria-label="Next testimonial"
               >
-                <ChevronRight className="w-5 h-5 text-white" />
+                <ChevronRight className="w-5 h-5 text-[var(--color-fg)]" />
               </button>
             </div>
           </div>

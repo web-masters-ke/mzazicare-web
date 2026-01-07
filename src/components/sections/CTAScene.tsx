@@ -10,7 +10,7 @@ import { GradientOrb } from "@/components/ui/GradientOrb";
 
 export function CTAScene() {
   return (
-    <SceneWrapper className="bg-black" overflow="hidden">
+    <SceneWrapper className="bg-[var(--color-bg)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background Elements */}
         <GradientOrb
@@ -30,7 +30,7 @@ export function CTAScene() {
 
             <div className="relative z-10">
               <AnimatedText animation="fade-up">
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-fg)] mb-6 leading-tight">
                   Ready to give your loved ones
                   <br />
                   <span className="text-brand-accent">the care they deserve?</span>
@@ -38,7 +38,7 @@ export function CTAScene() {
               </AnimatedText>
 
               <AnimatedText animation="fade-up" delay={100}>
-                <p className="text-xl text-white/60 max-w-2xl mx-auto mb-10">
+                <p className="text-xl text-[var(--color-fg-muted)] max-w-2xl mx-auto mb-10">
                   Join thousands of families who have found trusted, compassionate
                   caregivers through MzaziCare. Your journey to peace of mind starts
                   here.
@@ -66,17 +66,17 @@ export function CTAScene() {
 
               {/* Contact Options */}
               <AnimatedText animation="fade-up" delay={300}>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-white/50">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-[var(--color-fg-subtle)]">
                   <a
                     href="tel:+254700000000"
-                    className="flex items-center gap-2 hover:text-white transition-colors"
+                    className="flex items-center gap-2 hover:text-[var(--color-fg)] transition-colors"
                   >
                     <Phone size={18} />
                     <span>+254 700 000 000</span>
                   </a>
                   <a
                     href="mailto:care@mzazicare.com"
-                    className="flex items-center gap-2 hover:text-white transition-colors"
+                    className="flex items-center gap-2 hover:text-[var(--color-fg)] transition-colors"
                   >
                     <Mail size={18} />
                     <span>care@mzazicare.com</span>

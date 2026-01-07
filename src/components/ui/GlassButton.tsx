@@ -31,13 +31,13 @@ const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
         "before:transition-transform before:duration-700",
       ],
       secondary: [
-        "glass border border-white/20",
-        "text-white",
-        "hover:bg-white/10 hover:border-white/30",
+        "glass border border-[var(--glass-border)]",
+        "text-[var(--color-fg)]",
+        "hover:bg-[var(--glass-bg-medium)] hover:border-[var(--glass-border-hover)]",
       ],
       ghost: [
-        "bg-transparent text-white/80",
-        "hover:text-white hover:bg-white/5",
+        "bg-transparent text-[var(--color-fg-muted)]",
+        "hover:text-[var(--color-fg)] hover:bg-[var(--glass-bg-subtle)]",
       ],
     };
 

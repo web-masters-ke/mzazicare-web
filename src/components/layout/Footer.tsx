@@ -39,17 +39,17 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative bg-black border-t border-white/5">
+    <footer className="relative bg-[var(--color-bg-secondary)] border-t border-[var(--glass-border)]">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Brand Column */}
           <div className="col-span-2">
             <Link href="/" className="inline-block mb-4">
-              <span className="text-2xl font-bold text-white">
+              <span className="text-2xl font-bold text-[var(--color-fg)]">
                 Mzazi<span className="text-brand-accent">Care</span>
               </span>
             </Link>
-            <p className="text-sm text-white/50 mb-6 max-w-xs leading-relaxed">
+            <p className="text-sm text-[var(--color-fg-muted)] mb-6 max-w-xs leading-relaxed">
               Connecting families with trusted caregivers for elderly parents.
               Professional in-home care, simplified.
             </p>
@@ -64,7 +64,7 @@ export function Footer() {
                   className={cn(
                     "w-10 h-10 rounded-full glass-subtle",
                     "flex items-center justify-center",
-                    "text-white/50 hover:text-white hover:bg-white/10",
+                    "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--glass-bg)]",
                     "transition-all duration-200"
                   )}
                 >
@@ -77,7 +77,7 @@ export function Footer() {
           {/* Link Columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+              <h4 className="text-sm font-semibold text-[var(--color-fg)] uppercase tracking-wider mb-4">
                 {category}
               </h4>
               <ul className="space-y-3">
@@ -85,7 +85,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-white/50 hover:text-white transition-colors duration-200"
+                      className="text-sm text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors duration-200"
                     >
                       {link.label}
                     </Link>
@@ -97,11 +97,11 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-white/40">
+        <div className="pt-8 border-t border-[var(--glass-border)] flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-[var(--color-fg-subtle)]">
             &copy; {new Date().getFullYear()} MzaziCare. All rights reserved.
           </p>
-          <p className="text-sm text-white/40 flex items-center gap-1">
+          <p className="text-sm text-[var(--color-fg-subtle)] flex items-center gap-1">
             Made with{" "}
             <Heart size={14} className="text-brand-accent fill-brand-accent" /> in
             Kenya

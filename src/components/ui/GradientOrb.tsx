@@ -5,7 +5,7 @@ import { CSSProperties } from "react";
 
 interface GradientOrbProps {
   className?: string;
-  color?: "accent" | "white" | "mixed";
+  color?: "accent" | "secondary" | "mixed";
   size?: "sm" | "md" | "lg" | "xl";
   blur?: "soft" | "medium" | "heavy";
   animate?: boolean;
@@ -21,9 +21,9 @@ export function GradientOrb({
   style,
 }: GradientOrbProps) {
   const colors = {
-    accent: "bg-brand-accent/30",
-    white: "bg-white/20",
-    mixed: "bg-gradient-to-br from-brand-accent/30 via-white/10 to-brand-accent/20",
+    accent: "bg-[var(--orb-accent)]",
+    secondary: "bg-[var(--orb-secondary)]",
+    mixed: "bg-gradient-to-br from-[var(--orb-accent)] via-[var(--orb-secondary)] to-[var(--orb-accent)]",
   };
 
   const sizes = {

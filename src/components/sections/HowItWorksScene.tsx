@@ -51,7 +51,7 @@ export function HowItWorksScene() {
   const [activeStep, setActiveStep] = useState(0);
 
   return (
-    <SceneWrapper id="how-it-works" className="bg-black" overflow="hidden">
+    <SceneWrapper id="how-it-works" className="bg-[var(--color-bg)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background Decoration */}
         <GradientOrb
@@ -69,13 +69,13 @@ export function HowItWorksScene() {
             </p>
           </AnimatedText>
           <AnimatedText animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
               Finding care shouldn&apos;t be{" "}
               <span className="text-brand-accent">complicated</span>
             </h2>
           </AnimatedText>
           <AnimatedText animation="fade-up" delay={200}>
-            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+            <p className="text-xl text-[var(--color-fg-muted)] max-w-2xl mx-auto">
               Four simple steps to connect your loved ones with compassionate,
               professional caregivers.
             </p>
@@ -102,7 +102,7 @@ export function HowItWorksScene() {
                 onClick={() => setActiveStep(index)}
               >
                 {/* Step Number */}
-                <span className="text-5xl font-bold text-white/5 absolute top-4 right-4">
+                <span className="text-5xl font-bold text-[var(--color-fg)]/5 absolute top-4 right-4">
                   {step.number}
                 </span>
 
@@ -113,17 +113,17 @@ export function HowItWorksScene() {
                     "transition-all duration-500",
                     activeStep === index
                       ? "bg-brand-accent text-white"
-                      : "bg-white/5 text-white/60"
+                      : "bg-[var(--glass-bg)] text-[var(--color-fg-muted)]"
                   )}
                 >
                   <step.icon size={28} />
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-semibold text-white mb-3">
+                <h3 className="text-xl font-semibold text-[var(--color-fg)] mb-3">
                   {step.title}
                 </h3>
-                <p className="text-white/60 text-sm leading-relaxed mb-4">
+                <p className="text-[var(--color-fg-muted)] text-sm leading-relaxed mb-4">
                   {step.description}
                 </p>
 
@@ -136,7 +136,7 @@ export function HowItWorksScene() {
                       : "max-h-0 opacity-0"
                   )}
                 >
-                  <p className="text-brand-accent/80 text-xs leading-relaxed pt-4 border-t border-white/10">
+                  <p className="text-brand-accent/80 text-xs leading-relaxed pt-4 border-t border-[var(--glass-border)]">
                     {step.detail}
                   </p>
                 </div>
@@ -148,13 +148,13 @@ export function HowItWorksScene() {
         {/* Progress Indicator */}
         <AnimatedText animation="fade-up" delay={700}>
           <div className="mt-12 md:mt-16 max-w-md mx-auto">
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-1 bg-[var(--glass-bg)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-brand-accent rounded-full transition-all duration-500"
                 style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
               />
             </div>
-            <p className="text-center text-white/40 text-sm mt-4">
+            <p className="text-center text-[var(--color-fg-subtle)] text-sm mt-4">
               Step {activeStep + 1} of {steps.length}
             </p>
           </div>

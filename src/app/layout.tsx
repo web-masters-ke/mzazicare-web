@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const urbanist = Urbanist({
@@ -45,9 +46,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={urbanist.variable}>
-      <body className="font-sans antialiased bg-black text-white min-h-screen">
-        {children}
+    <html lang="en" className={urbanist.variable} suppressHydrationWarning>
+      <body className="font-sans antialiased min-h-screen">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -110,7 +110,7 @@ export function ServicesScene() {
   const ActiveIcon = services[activeService].icon;
 
   return (
-    <SceneWrapper id="services" className="bg-black" overflow="hidden">
+    <SceneWrapper id="services" className="bg-[var(--color-bg)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background */}
         <GradientOrb
@@ -128,7 +128,7 @@ export function ServicesScene() {
             </p>
           </AnimatedText>
           <AnimatedText animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
               Services tailored to{" "}
               <span className="text-brand-accent">your needs</span>
             </h2>
@@ -152,7 +152,7 @@ export function ServicesScene() {
                     "flex items-center gap-4 group",
                     activeService === index
                       ? "glass border-brand-accent/30 bg-brand-accent/10"
-                      : "hover:bg-white/5 border border-transparent"
+                      : "hover:bg-[var(--glass-bg-subtle)] border border-transparent"
                   )}
                 >
                   <div
@@ -160,7 +160,7 @@ export function ServicesScene() {
                       "w-10 h-10 rounded-lg flex items-center justify-center transition-colors",
                       activeService === index
                         ? "bg-brand-accent text-white"
-                        : "bg-white/10 text-white/60"
+                        : "bg-[var(--glass-bg)] text-[var(--color-fg-muted)]"
                     )}
                   >
                     <service.icon size={20} />
@@ -169,12 +169,12 @@ export function ServicesScene() {
                     <h3
                       className={cn(
                         "font-medium transition-colors truncate",
-                        activeService === index ? "text-white" : "text-white/70"
+                        activeService === index ? "text-[var(--color-fg)]" : "text-[var(--color-fg-muted)]"
                       )}
                     >
                       {service.title}
                     </h3>
-                    <p className="text-xs text-white/40 truncate">
+                    <p className="text-xs text-[var(--color-fg-subtle)] truncate">
                       {service.shortDesc}
                     </p>
                   </div>
@@ -183,7 +183,7 @@ export function ServicesScene() {
                       "w-5 h-5 transition-all flex-shrink-0",
                       activeService === index
                         ? "text-brand-accent translate-x-1"
-                        : "text-white/20"
+                        : "text-[var(--color-fg-subtle)]"
                     )}
                   />
                 </button>
@@ -213,17 +213,17 @@ export function ServicesScene() {
                       <ActiveIcon className="w-8 h-8 text-brand-accent" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">
+                      <h3 className="text-2xl font-bold text-[var(--color-fg)]">
                         {services[activeService].title}
                       </h3>
-                      <p className="text-white/50">
+                      <p className="text-[var(--color-fg-subtle)]">
                         {services[activeService].shortDesc}
                       </p>
                     </div>
                   </div>
 
                   {/* Description */}
-                  <p className="text-white/70 text-lg leading-relaxed mb-8">
+                  <p className="text-[var(--color-fg-muted)] text-lg leading-relaxed mb-8">
                     {services[activeService].description}
                   </p>
 
@@ -232,7 +232,7 @@ export function ServicesScene() {
                     {services[activeService].features.map((feature) => (
                       <div
                         key={feature}
-                        className="flex items-center gap-3 text-white/60"
+                        className="flex items-center gap-3 text-[var(--color-fg-muted)]"
                       >
                         <div className="w-2 h-2 rounded-full bg-brand-accent flex-shrink-0" />
                         <span className="text-sm">{feature}</span>

@@ -38,7 +38,7 @@ export function HeroScene() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-zinc-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)] via-[var(--color-bg)] to-[var(--color-bg-secondary)]" />
 
       {/* Parallax Gradient Orbs */}
       <GradientOrb
@@ -90,7 +90,7 @@ export function HeroScene() {
             <AnimatedText animation="fade-up" delay={0}>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-subtle">
                 <span className="w-2 h-2 bg-brand-accent rounded-full animate-pulse" />
-                <span className="text-sm text-white/70">
+                <span className="text-sm text-[var(--color-fg-muted)]">
                   Trusted by 10,000+ families in Kenya
                 </span>
               </div>
@@ -98,7 +98,7 @@ export function HeroScene() {
 
             {/* Headline */}
             <AnimatedText animation="fade-up" delay={100}>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[var(--color-fg)] leading-[1.1] tracking-tight">
                 Care for those who{" "}
                 <span className="relative inline-block">
                   <span className="text-brand-accent">cared for you</span>
@@ -122,7 +122,7 @@ export function HeroScene() {
 
             {/* Subheadline */}
             <AnimatedText animation="fade-up" delay={200}>
-              <p className="text-xl text-white/60 max-w-lg leading-relaxed">
+              <p className="text-xl text-[var(--color-fg-muted)] max-w-lg leading-relaxed">
                 Connect with vetted, compassionate caregivers who treat your elderly
                 parents like their own family. Professional in-home care, simplified.
               </p>
@@ -156,7 +156,7 @@ export function HeroScene() {
                     <div
                       key={i}
                       className={cn(
-                        "w-10 h-10 rounded-full border-2 border-black",
+                        "w-10 h-10 rounded-full border-2 border-[var(--color-bg)]",
                         "bg-gradient-to-br from-brand-accent to-brand-accent-light",
                         "flex items-center justify-center text-white text-xs font-bold"
                       )}
@@ -165,8 +165,8 @@ export function HeroScene() {
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-white/60">
-                  <span className="text-white font-semibold">500+</span> caregivers
+                <p className="text-sm text-[var(--color-fg-muted)]">
+                  <span className="text-[var(--color-fg)] font-semibold">500+</span> caregivers
                   joined this month
                 </p>
               </div>
@@ -186,10 +186,10 @@ export function HeroScene() {
                   <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-brand-accent to-brand-accent-light flex items-center justify-center">
                     <Heart className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white">
+                  <h3 className="text-xl font-semibold text-[var(--color-fg)]">
                     Professional Care
                   </h3>
-                  <p className="text-sm text-white/60 px-4">
+                  <p className="text-sm text-[var(--color-fg-muted)] px-4">
                     Background-checked caregivers ready to help your loved ones
                   </p>
                 </div>
@@ -214,8 +214,8 @@ export function HeroScene() {
                   hover
                 >
                   <stat.icon className="w-5 h-5 text-brand-accent mb-2" />
-                  <p className="text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="text-xs text-white/50">{stat.label}</p>
+                  <p className="text-2xl font-bold text-[var(--color-fg)]">{stat.value}</p>
+                  <p className="text-xs text-[var(--color-fg-subtle)]">{stat.label}</p>
                 </GlassCard>
               </AnimatedText>
             ))}
@@ -225,11 +225,11 @@ export function HeroScene() {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className="text-xs text-white/40 uppercase tracking-widest">
+        <span className="text-xs text-[var(--color-fg-subtle)] uppercase tracking-widest">
           Scroll to explore
         </span>
-        <div className="w-6 h-10 rounded-full border border-white/20 flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-white/50 rounded-full animate-bounce-soft" />
+        <div className="w-6 h-10 rounded-full border border-[var(--glass-border)] flex items-start justify-center p-2">
+          <div className="w-1 h-2 bg-[var(--color-fg-subtle)] rounded-full animate-bounce-soft" />
         </div>
       </div>
     </section>
