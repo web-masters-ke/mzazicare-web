@@ -52,7 +52,7 @@ export function HeroScene() {
         }}
       />
       <GradientOrb
-        color="white"
+        color="secondary"
         size="lg"
         blur="heavy"
         className="bottom-1/4 -right-20 opacity-20"

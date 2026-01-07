@@ -113,7 +113,7 @@ export function StatsScene() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-20 md:py-32 bg-gradient-to-b from-black via-zinc-950 to-black overflow-hidden"
+      className="relative py-20 md:py-32 bg-gradient-to-b from-[var(--color-bg)] via-[var(--color-bg-secondary)] to-[var(--color-bg)] overflow-hidden"
     >
       {/* Animated background lines */}
       <div className="absolute inset-0 opacity-20">
@@ -138,7 +138,7 @@ export function StatsScene() {
             </p>
           </AnimatedText>
           <AnimatedText animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl font-bold text-white">
+            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)]">
               Numbers that speak for{" "}
               <span className="text-brand-accent">themselves</span>
             </h2>
@@ -156,8 +156,8 @@ export function StatsScene() {
               <div
                 className={cn(
                   "relative group p-6 md:p-8 rounded-3xl",
-                  "bg-gradient-to-br from-white/5 to-transparent",
-                  "border border-white/5 hover:border-brand-accent/30",
+                  "bg-gradient-to-br from-[var(--glass-bg-subtle)] to-transparent",
+                  "border border-[var(--glass-border)] hover:border-brand-accent/30",
                   "transition-all duration-500 hover:scale-105"
                 )}
               >
@@ -171,7 +171,7 @@ export function StatsScene() {
                   </div>
 
                   {/* Value */}
-                  <p className="text-4xl md:text-5xl font-bold text-white mb-2">
+                  <p className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-2">
                     <AnimatedCounter
                       value={stat.value}
                       suffix={stat.suffix}
@@ -180,12 +180,12 @@ export function StatsScene() {
                   </p>
 
                   {/* Label */}
-                  <p className="text-lg font-semibold text-white mb-1">
+                  <p className="text-lg font-semibold text-[var(--color-fg)] mb-1">
                     {stat.label}
                   </p>
 
                   {/* Description */}
-                  <p className="text-sm text-white/50">{stat.description}</p>
+                  <p className="text-sm text-[var(--color-fg-subtle)]">{stat.description}</p>
                 </div>
               </div>
             </AnimatedText>

@@ -77,7 +77,7 @@ export function PricingScene() {
   const [isAnnual, setIsAnnual] = useState(true);
 
   return (
-    <SceneWrapper id="pricing" className="bg-zinc-950" overflow="hidden">
+    <SceneWrapper id="pricing" className="bg-[var(--color-bg-secondary)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background */}
         <GradientOrb
@@ -95,13 +95,13 @@ export function PricingScene() {
             </p>
           </AnimatedText>
           <AnimatedText animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
               Care plans that fit{" "}
               <span className="text-brand-accent">your budget</span>
             </h2>
           </AnimatedText>
           <AnimatedText animation="fade-up" delay={200}>
-            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+            <p className="text-xl text-[var(--color-fg-muted)] max-w-2xl mx-auto">
               Transparent pricing with no hidden fees. Choose the plan that works
               for your family.
             </p>
@@ -114,7 +114,7 @@ export function PricingScene() {
             <span
               className={cn(
                 "text-sm font-medium transition-colors",
-                !isAnnual ? "text-white" : "text-white/50"
+                !isAnnual ? "text-[var(--color-fg)]" : "text-[var(--color-fg-subtle)]"
               )}
             >
               Monthly
@@ -123,7 +123,7 @@ export function PricingScene() {
               onClick={() => setIsAnnual(!isAnnual)}
               className={cn(
                 "relative w-14 h-8 rounded-full transition-colors",
-                isAnnual ? "bg-brand-accent" : "bg-white/20"
+                isAnnual ? "bg-brand-accent" : "bg-[var(--glass-bg)]"
               )}
             >
               <div
@@ -136,7 +136,7 @@ export function PricingScene() {
             <span
               className={cn(
                 "text-sm font-medium transition-colors",
-                isAnnual ? "text-white" : "text-white/50"
+                isAnnual ? "text-[var(--color-fg)]" : "text-[var(--color-fg-subtle)]"
               )}
             >
               Annually
@@ -161,7 +161,7 @@ export function PricingScene() {
                   "transition-all duration-500 hover:scale-[1.02]",
                   plan.highlighted
                     ? "bg-gradient-to-br from-brand-accent/20 to-brand-accent/5 border-2 border-brand-accent/50"
-                    : "bg-white/5 border border-white/10 hover:border-white/20"
+                    : "bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] hover:border-[var(--glass-border-hover)]"
                 )}
               >
                 {/* Badge */}
@@ -181,33 +181,33 @@ export function PricingScene() {
                         "w-12 h-12 rounded-xl flex items-center justify-center",
                         plan.highlighted
                           ? "bg-brand-accent text-white"
-                          : "bg-white/10 text-white/70"
+                          : "bg-[var(--glass-bg)] text-[var(--color-fg-muted)]"
                       )}
                     >
                       <plan.icon className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">
+                      <h3 className="text-xl font-bold text-[var(--color-fg)]">
                         {plan.name}
                       </h3>
-                      <p className="text-sm text-white/50">{plan.description}</p>
+                      <p className="text-sm text-[var(--color-fg-subtle)]">{plan.description}</p>
                     </div>
                   </div>
 
                   {/* Price */}
                   <div className="mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-sm text-white/50">
+                      <span className="text-sm text-[var(--color-fg-subtle)]">
                         {plan.currency}
                       </span>
-                      <span className="text-5xl font-bold text-white">
+                      <span className="text-5xl font-bold text-[var(--color-fg)]">
                         {(isAnnual
                           ? plan.price.annually
                           : plan.price.monthly
                         ).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-sm text-white/50 mt-1">{plan.period}</p>
+                    <p className="text-sm text-[var(--color-fg-subtle)] mt-1">{plan.period}</p>
                   </div>
 
                   {/* Features */}
@@ -222,10 +222,10 @@ export function PricingScene() {
                             "w-5 h-5 flex-shrink-0 mt-0.5",
                             plan.highlighted
                               ? "text-brand-accent"
-                              : "text-white/50"
+                              : "text-[var(--color-fg-subtle)]"
                           )}
                         />
-                        <span className="text-white/70">{feature}</span>
+                        <span className="text-[var(--color-fg-muted)]">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -247,7 +247,7 @@ export function PricingScene() {
 
         {/* Bottom Note */}
         <AnimatedText animation="fade-up" delay={700}>
-          <p className="text-center text-white/40 text-sm mt-12">
+          <p className="text-center text-[var(--color-fg-subtle)] text-sm mt-12">
             All plans include a 14-day free trial. No credit card required to
             start.
           </p>

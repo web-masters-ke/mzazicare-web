@@ -66,7 +66,7 @@ function FAQItem({
     <AnimatedText animation="fade-up" delay={200 + index * 50}>
       <div
         className={cn(
-          "border-b border-white/5 last:border-b-0",
+          "border-b border-[var(--glass-border)] last:border-b-0",
           "transition-all duration-300"
         )}
       >
@@ -80,7 +80,7 @@ function FAQItem({
           <span
             className={cn(
               "text-lg font-medium transition-colors",
-              isOpen ? "text-brand-accent" : "text-white group-hover:text-white/80"
+              isOpen ? "text-brand-accent" : "text-[var(--color-fg)] group-hover:text-[var(--color-fg-muted)]"
             )}
           >
             {faq.question}
@@ -91,7 +91,7 @@ function FAQItem({
               "transition-all duration-300",
               isOpen
                 ? "bg-brand-accent text-white rotate-180"
-                : "bg-white/5 text-white/50 group-hover:bg-white/10"
+                : "bg-[var(--glass-bg-subtle)] text-[var(--color-fg-subtle)] group-hover:bg-[var(--glass-bg)]"
             )}
           >
             <ChevronDown className="w-5 h-5" />
@@ -103,7 +103,7 @@ function FAQItem({
             isOpen ? "max-h-96 pb-6" : "max-h-0"
           )}
         >
-          <p className="text-white/60 leading-relaxed pr-12">{faq.answer}</p>
+          <p className="text-[var(--color-fg-muted)] leading-relaxed pr-12">{faq.answer}</p>
         </div>
       </div>
     </AnimatedText>
@@ -118,11 +118,11 @@ export function FAQScene() {
   };
 
   return (
-    <SceneWrapper id="faq" className="bg-black" overflow="hidden">
+    <SceneWrapper id="faq" className="bg-[var(--color-bg)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background */}
         <GradientOrb
-          color="white"
+          color="secondary"
           size="xl"
           blur="heavy"
           className="-top-32 -left-32 opacity-10"
@@ -137,13 +137,13 @@ export function FAQScene() {
               </p>
             </AnimatedText>
             <AnimatedText animation="fade-up" delay={100}>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
                 Frequently asked{" "}
                 <span className="text-brand-accent">questions</span>
               </h2>
             </AnimatedText>
             <AnimatedText animation="fade-up" delay={200}>
-              <p className="text-xl text-white/60 mb-8">
+              <p className="text-xl text-[var(--color-fg-muted)] mb-8">
                 Can&apos;t find what you&apos;re looking for? Our support team is
                 here to help.
               </p>
@@ -158,13 +158,13 @@ export function FAQScene() {
             {/* Stats */}
             <AnimatedText animation="fade-up" delay={400}>
               <div className="mt-12 grid grid-cols-2 gap-6">
-                <div className="p-4 rounded-2xl bg-white/5">
-                  <p className="text-3xl font-bold text-white mb-1">{"<"}2min</p>
-                  <p className="text-sm text-white/50">Avg. response time</p>
+                <div className="p-4 rounded-2xl bg-[var(--glass-bg-subtle)]">
+                  <p className="text-3xl font-bold text-[var(--color-fg)] mb-1">{"<"}2min</p>
+                  <p className="text-sm text-[var(--color-fg-subtle)]">Avg. response time</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-white/5">
-                  <p className="text-3xl font-bold text-white mb-1">24/7</p>
-                  <p className="text-sm text-white/50">Support available</p>
+                <div className="p-4 rounded-2xl bg-[var(--glass-bg-subtle)]">
+                  <p className="text-3xl font-bold text-[var(--color-fg)] mb-1">24/7</p>
+                  <p className="text-sm text-[var(--color-fg-subtle)]">Support available</p>
                 </div>
               </div>
             </AnimatedText>

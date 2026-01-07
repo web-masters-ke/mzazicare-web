@@ -84,7 +84,7 @@ export function TestimonialsScene() {
           className="top-0 right-0 opacity-15"
         />
         <GradientOrb
-          color="white"
+          color="secondary"
           size="lg"
           blur="heavy"
           className="bottom-0 left-0 opacity-10"

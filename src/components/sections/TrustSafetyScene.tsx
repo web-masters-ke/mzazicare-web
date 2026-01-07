@@ -64,7 +64,7 @@ export function TrustSafetyScene() {
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background Elements */}
         <GradientOrb
-          color="white"
+          color="secondary"
           size="xl"
           blur="heavy"
           className="-top-32 -left-32 opacity-10"

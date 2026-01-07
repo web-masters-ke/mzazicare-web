@@ -68,7 +68,7 @@ export function CaregiverSpotlight() {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   return (
-    <SceneWrapper className="bg-black" overflow="hidden">
+    <SceneWrapper className="bg-[var(--color-bg)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background */}
         <GradientOrb
@@ -87,7 +87,7 @@ export function CaregiverSpotlight() {
               </p>
             </AnimatedText>
             <AnimatedText animation="fade-up" delay={100}>
-              <h2 className="text-4xl md:text-5xl font-bold text-white">
+              <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)]">
                 Exceptional people providing{" "}
                 <span className="text-brand-accent">exceptional care</span>
               </h2>
@@ -112,8 +112,8 @@ export function CaregiverSpotlight() {
               <div
                 className={cn(
                   "group relative rounded-3xl overflow-hidden",
-                  "bg-gradient-to-br from-white/5 to-transparent",
-                  "border border-white/5 hover:border-white/20",
+                  "bg-gradient-to-br from-[var(--glass-bg-subtle)] to-transparent",
+                  "border border-[var(--glass-border)] hover:border-[var(--glass-border-hover)]",
                   "transition-all duration-500",
                   hoveredId === caregiver.id && "scale-[1.02]"
                 )}
@@ -143,14 +143,14 @@ export function CaregiverSpotlight() {
                     </div>
                     <div className="flex items-center gap-1 px-3 py-1 rounded-full glass-subtle">
                       <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                      <span className="text-sm font-semibold text-white">
+                      <span className="text-sm font-semibold text-[var(--color-fg)]">
                         {caregiver.rating}
                       </span>
                     </div>
                   </div>
 
                   {/* Info */}
-                  <h3 className="text-xl font-bold text-white mb-1">
+                  <h3 className="text-xl font-bold text-[var(--color-fg)] mb-1">
                     {caregiver.name}
                   </h3>
                   <p className="text-brand-accent text-sm font-medium mb-3">
@@ -158,7 +158,7 @@ export function CaregiverSpotlight() {
                   </p>
 
                   {/* Meta */}
-                  <div className="flex flex-wrap gap-3 mb-4 text-sm text-white/60">
+                  <div className="flex flex-wrap gap-3 mb-4 text-sm text-[var(--color-fg-muted)]">
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       {caregiver.location}
@@ -170,7 +170,7 @@ export function CaregiverSpotlight() {
                   </div>
 
                   {/* Bio */}
-                  <p className="text-sm text-white/50 mb-4 line-clamp-2">
+                  <p className="text-sm text-[var(--color-fg-subtle)] mb-4 line-clamp-2">
                     {caregiver.bio}
                   </p>
 
@@ -179,21 +179,21 @@ export function CaregiverSpotlight() {
                     {caregiver.specialties.slice(0, 2).map((specialty) => (
                       <span
                         key={specialty}
-                        className="px-2 py-1 text-xs rounded-full bg-white/5 text-white/70"
+                        className="px-2 py-1 text-xs rounded-full bg-[var(--glass-bg-subtle)] text-[var(--color-fg-muted)]"
                       >
                         {specialty}
                       </span>
                     ))}
                     {caregiver.specialties.length > 2 && (
-                      <span className="px-2 py-1 text-xs rounded-full bg-white/5 text-white/70">
+                      <span className="px-2 py-1 text-xs rounded-full bg-[var(--glass-bg-subtle)] text-[var(--color-fg-muted)]">
                         +{caregiver.specialties.length - 2}
                       </span>
                     )}
                   </div>
 
                   {/* Reviews count */}
-                  <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                    <span className="text-xs text-white/40">
+                  <div className="mt-4 pt-4 border-t border-[var(--glass-border)] flex items-center justify-between">
+                    <span className="text-xs text-[var(--color-fg-subtle)]">
                       {caregiver.reviews} reviews
                     </span>
                     <Award className="w-4 h-4 text-brand-accent" />

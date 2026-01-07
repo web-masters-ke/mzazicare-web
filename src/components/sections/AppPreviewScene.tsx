@@ -61,7 +61,7 @@ export function AppPreviewScene() {
   const [activeScreen, setActiveScreen] = useState("home");
 
   return (
-    <SceneWrapper className="bg-gradient-to-b from-zinc-950 to-black" overflow="hidden">
+    <SceneWrapper className="bg-gradient-to-b from-[var(--color-bg-secondary)] to-[var(--color-bg)]" overflow="hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Background */}
         <GradientOrb
@@ -190,7 +190,7 @@ export function AppPreviewScene() {
                 <div className="absolute -top-4 -right-4 md:-right-8 p-3 rounded-xl glass animate-float">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                    <span className="text-white text-xs font-medium">
+                    <span className="text-[var(--color-fg)] text-xs font-medium">
                       Live Tracking
                     </span>
                   </div>
@@ -202,7 +202,7 @@ export function AppPreviewScene() {
                 >
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-brand-accent" />
-                    <span className="text-white text-xs font-medium">
+                    <span className="text-[var(--color-fg)] text-xs font-medium">
                       Verified Care
                     </span>
                   </div>
@@ -219,13 +219,13 @@ export function AppPreviewScene() {
               </p>
             </AnimatedText>
             <AnimatedText animation="fade-up" delay={100}>
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
                 Care management in{" "}
                 <span className="text-brand-accent">your pocket</span>
               </h2>
             </AnimatedText>
             <AnimatedText animation="fade-up" delay={200}>
-              <p className="text-xl text-white/60 mb-10">
+              <p className="text-xl text-[var(--color-fg-muted)] mb-10">
                 Book caregivers, track visits, receive updates, and manage
                 everything from our intuitive mobile app.
               </p>
@@ -239,15 +239,15 @@ export function AppPreviewScene() {
                   animation="fade-up"
                   delay={300 + index * 50}
                 >
-                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group">
+                  <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-[var(--glass-bg-subtle)] transition-colors group">
                     <div className="w-10 h-10 rounded-xl bg-brand-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-accent/20 transition-colors">
                       <feature.icon className="w-5 h-5 text-brand-accent" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white mb-1">
+                      <h3 className="font-semibold text-[var(--color-fg)] mb-1">
                         {feature.title}
                       </h3>
-                      <p className="text-sm text-white/50">
+                      <p className="text-sm text-[var(--color-fg-subtle)]">
                         {feature.description}
                       </p>
                     </div>
@@ -259,22 +259,22 @@ export function AppPreviewScene() {
             {/* App Store Badges */}
             <AnimatedText animation="fade-up" delay={600}>
               <div className="flex flex-wrap gap-4 mt-10">
-                <div className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-pointer">
-                  <Smartphone className="w-6 h-6 text-white" />
+                <div className="px-6 py-3 rounded-xl bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] flex items-center gap-3 hover:bg-[var(--glass-bg)] transition-colors cursor-pointer">
+                  <Smartphone className="w-6 h-6 text-[var(--color-fg)]" />
                   <div>
-                    <p className="text-[10px] text-white/50 uppercase">
+                    <p className="text-[10px] text-[var(--color-fg-subtle)] uppercase">
                       Coming soon on
                     </p>
-                    <p className="text-white font-semibold">Google Play</p>
+                    <p className="text-[var(--color-fg)] font-semibold">Google Play</p>
                   </div>
                 </div>
-                <div className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 hover:bg-white/10 transition-colors cursor-pointer">
-                  <Smartphone className="w-6 h-6 text-white" />
+                <div className="px-6 py-3 rounded-xl bg-[var(--glass-bg-subtle)] border border-[var(--glass-border)] flex items-center gap-3 hover:bg-[var(--glass-bg)] transition-colors cursor-pointer">
+                  <Smartphone className="w-6 h-6 text-[var(--color-fg)]" />
                   <div>
-                    <p className="text-[10px] text-white/50 uppercase">
+                    <p className="text-[10px] text-[var(--color-fg-subtle)] uppercase">
                       Coming soon on
                     </p>
-                    <p className="text-white font-semibold">App Store</p>
+                    <p className="text-[var(--color-fg)] font-semibold">App Store</p>
                   </div>
                 </div>
               </div>
