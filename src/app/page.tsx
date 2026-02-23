@@ -1,5 +1,6 @@
+"use client";
+
 import { LandingNav } from "@/components/navigation/LandingNav";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { HeroScene } from "@/components/sections/HeroScene";
 import { FeaturesScene } from "@/components/sections/FeaturesScene";
 import { HowItWorksScene } from "@/components/sections/HowItWorksScene";
@@ -16,7 +17,6 @@ export default function Home() {
   return (
     <>
       <LandingNav />
-      <ThemeToggle />
       <main>
         {/* Hero - Bento grid layout */}
         <HeroScene />
