@@ -8,18 +8,18 @@
    ============================================ */
 
 @theme {
-  /* Primary - Vibrant Blue */
-  --color-primary-50: #EEF4FF;
-  --color-primary-100: #E0EBFF;
-  --color-primary-200: #C7D9FF;
-  --color-primary-300: #A5C0FF;
-  --color-primary-400: #7A9CFF;
-  --color-primary-500: #4F6EF7;
-  --color-primary-600: #3B50EC;
-  --color-primary-700: #2F3FD9;
-  --color-primary-800: #2935AF;
-  --color-primary-900: #28338A;
-  --color-primary-950: #1A1F54;
+  /* Primary - Coral Orange */
+  --color-primary-50: #FFF5F0;
+  --color-primary-100: #FFEDE5;
+  --color-primary-200: #FFD6C7;
+  --color-primary-300: #FFB8A0;
+  --color-primary-400: #FF8F6B;
+  --color-primary-500: #FF6B3D;
+  --color-primary-600: #F04A1A;
+  --color-primary-700: #C73A12;
+  --color-primary-800: #A33215;
+  --color-primary-900: #872E17;
+  --color-primary-950: #4A1408;
 
   /* Accent - Coral/Orange for highlights */
   --color-accent-50: #FFF5F0;
