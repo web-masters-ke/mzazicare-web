@@ -8,6 +8,7 @@ import { Button, Badge, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { UserRole } from '@/types/models';
 import { useWallet } from '@/hooks/useWallet';
+import { PaymentStatusModal } from '@/components/wallet/PaymentStatusModal';
 import {
   Wallet,
   Plus,
@@ -36,6 +37,9 @@ function WalletContent() {
 
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showPaymentStatusModal, setShowPaymentStatusModal] = useState(false);
+  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
+  const [pendingAmount, setPendingAmount] = useState(0);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawMethod, setWithdrawMethod] = useState<'MPESA' | 'BANK'>('MPESA');
@@ -76,24 +80,18 @@ function WalletContent() {
         formattedPhone = '+254' + formattedPhone;
       }
 
+      const amount = Number(topUpAmount);
+
       const response = await topUpWallet({
-        phoneNumber: formattedPhone,
-        amount: Number(topUpAmount),
+        phone: formattedPhone,
+        amount,
       });
 
-      setTopUpSuccess(true);
-      setTopUpAmount('');
-
-      // Show success message
-      alert(`M-Pesa STK Push sent! Please check your phone and enter your M-Pesa PIN.\n\nCheckout Request ID: ${response.checkoutRequestId}`);
-
+      // Store checkout request ID, amount, and show payment status modal
+      setCheckoutRequestId(response.checkoutRequestId);
+      setPendingAmount(amount);
       setShowTopUpModal(false);
-
-      // Refresh wallet and transactions after a delay to allow for callback processing
-      setTimeout(() => {
-        fetchWallet();
-        fetchTransactions();
-      }, 5000);
+      setShowPaymentStatusModal(true);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to initiate top-up';
       setTopUpError(errorMessage);
@@ -137,7 +135,7 @@ function WalletContent() {
       const response = await withdrawFromWallet({
         amount: Number(withdrawAmount),
         method: withdrawMethod,
-        phoneNumber: withdrawMethod === 'MPESA' ? formattedPhone : undefined,
+        phone: withdrawMethod === 'MPESA' ? formattedPhone : undefined,
       });
 
       alert(`Withdrawal initiated successfully!\n\n${response.message}\n\nTransaction ID: ${response.transactionId}`);
@@ -548,6 +546,31 @@ function WalletContent() {
       )}
 
       <BottomNav />
+
+      {/* Payment Status Modal */}
+      {checkoutRequestId && (
+        <PaymentStatusModal
+          checkoutRequestId={checkoutRequestId}
+          amount={pendingAmount}
+          isOpen={showPaymentStatusModal}
+          onSuccess={() => {
+            // Refresh wallet and transactions
+            fetchWallet();
+            fetchTransactions();
+            setTopUpAmount('');
+            setPhoneNumber('');
+            setTopUpSuccess(true);
+          }}
+          onClose={() => {
+            setShowPaymentStatusModal(false);
+            setCheckoutRequestId(null);
+            setPendingAmount(0);
+            // Refresh in case payment completed
+            fetchWallet();
+            fetchTransactions();
+          }}
+        />
+      )}
     </div>
   );
 }
