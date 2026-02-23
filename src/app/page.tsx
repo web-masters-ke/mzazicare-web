@@ -1,13 +1,12 @@
-import { Navbar } from "@/components/navigation/Navbar";
+import { LandingNav } from "@/components/navigation/LandingNav";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { HeroScene } from "@/components/sections/HeroScene";
-import { PartnersScene } from "@/components/sections/PartnersScene";
+import { FeaturesScene } from "@/components/sections/FeaturesScene";
 import { HowItWorksScene } from "@/components/sections/HowItWorksScene";
-import { StatsScene } from "@/components/sections/StatsScene";
-import { ServicesScene } from "@/components/sections/ServicesScene";
-import { CaregiverSpotlight } from "@/components/sections/CaregiverSpotlight";
-import { TrustSafetyScene } from "@/components/sections/TrustSafetyScene";
-import { AppPreviewScene } from "@/components/sections/AppPreviewScene";
-import { PricingScene } from "@/components/sections/PricingScene";
+import { ForFamilies } from "@/components/sections/ForFamilies";
+import { ForCaregivers } from "@/components/sections/ForCaregivers";
+import { LiveActivity } from "@/components/sections/LiveActivity";
+import { SuccessStories } from "@/components/sections/SuccessStories";
 import { TestimonialsScene } from "@/components/sections/TestimonialsScene";
 import { FAQScene } from "@/components/sections/FAQScene";
 import { CTAScene } from "@/components/sections/CTAScene";
@@ -16,40 +15,45 @@ import { Footer } from "@/components/layout/Footer";
 export default function Home() {
   return (
     <>
-      <Navbar />
+      <LandingNav />
+      <ThemeToggle />
       <main>
-        {/* Hero - Immersive entry point */}
+        {/* Hero - Bento grid layout */}
         <HeroScene />
 
-        {/* Partners - Social proof marquee */}
-        <PartnersScene />
+        {/* Features - Bento grid with key features */}
+        <div id="features">
+          <FeaturesScene />
+        </div>
 
-        {/* How it works - Process explanation */}
-        <HowItWorksScene />
+        {/* How it works - 4-step process */}
+        <div id="how-it-works">
+          <HowItWorksScene />
+        </div>
 
-        {/* Stats - Impact numbers with animation */}
-        <StatsScene />
+        {/* For Families - Dark background section */}
+        <div id="for-families">
+          <ForFamilies />
+        </div>
 
-        {/* Services - Interactive service selector */}
-        <ServicesScene />
+        {/* For Caregivers - Light background section */}
+        <div id="for-caregivers">
+          <ForCaregivers />
+        </div>
 
-        {/* Caregiver Spotlight - Featured caregivers */}
-        <CaregiverSpotlight />
+        {/* Live Activity - Real-time feed */}
+        <LiveActivity />
 
-        {/* Trust & Safety - Verification features */}
-        <TrustSafetyScene />
+        {/* Success Stories - Community testimonials */}
+        <SuccessStories />
 
-        {/* App Preview - Phone mockup */}
-        <AppPreviewScene />
-
-        {/* Pricing - Plan cards */}
-        <PricingScene />
-
-        {/* Testimonials - Customer stories */}
+        {/* Testimonials - Customer reviews */}
         <TestimonialsScene />
 
         {/* FAQ - Accordion */}
-        <FAQScene />
+        <div id="faq">
+          <FAQScene />
+        </div>
 
         {/* CTA - Final conversion */}
         <CTAScene />

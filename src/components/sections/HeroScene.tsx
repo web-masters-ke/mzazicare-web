@@ -1,235 +1,170 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Shield, Heart, Star } from "lucide-react";
-import { GlassButton } from "@/components/ui/GlassButton";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { AnimatedText } from "@/components/ui/AnimatedText";
-import { GradientOrb } from "@/components/ui/GradientOrb";
-import { cn } from "@/lib/utils";
-
-const floatingStats = [
-  { icon: Shield, label: "Verified Caregivers", value: "2,500+" },
-  { icon: Heart, label: "Families Helped", value: "10,000+" },
-  { icon: Star, label: "Average Rating", value: "4.9" },
-];
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui";
+import { motion } from "framer-motion";
 
 export function HeroScene() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const heroRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!heroRef.current) return;
-      const rect = heroRef.current.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      setMousePosition({ x, y });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
   return (
-    <section
-      ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-    >
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-bg)] via-[var(--color-bg)] to-[var(--color-bg-secondary)]" />
-
-      {/* Parallax Gradient Orbs */}
-      <GradientOrb
-        color="accent"
-        size="xl"
-        blur="heavy"
-        className="top-1/4 -left-32 opacity-40"
-        style={{
-          transform: `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`,
-          transition: "transform 0.3s ease-out",
-        }}
-      />
-      <GradientOrb
-        color="secondary"
-        size="lg"
-        blur="heavy"
-        className="bottom-1/4 -right-20 opacity-20"
-        style={{
-          transform: `translate(${mousePosition.x * -20}px, ${mousePosition.y * -20}px)`,
-          transition: "transform 0.3s ease-out",
-        }}
-      />
-      <GradientOrb
-        color="accent"
-        size="md"
-        blur="medium"
-        className="top-1/2 right-1/4 opacity-20"
-        animate={true}
-      />
-
-      {/* Subtle Grid Pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-20">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Column - Text Content */}
-          <div className="space-y-8">
-            {/* Badge */}
-            <AnimatedText animation="fade-up" delay={0}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-subtle">
-                <span className="w-2 h-2 bg-brand-accent rounded-full animate-pulse" />
-                <span className="text-sm text-[var(--color-fg-muted)]">
-                  Trusted by 10,000+ families in Kenya
-                </span>
-              </div>
-            </AnimatedText>
-
-            {/* Headline */}
-            <AnimatedText animation="fade-up" delay={100}>
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[var(--color-fg)] leading-[1.1] tracking-tight">
-                Care for those who{" "}
-                <span className="relative inline-block">
-                  <span className="text-brand-accent">cared for you</span>
-                  <svg
-                    className="absolute -bottom-2 left-0 w-full"
-                    viewBox="0 0 200 12"
-                    fill="none"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M2 10C50 2 150 2 198 10"
-                      stroke="#EC704E"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      className="animate-draw"
-                    />
-                  </svg>
-                </span>
-              </h1>
-            </AnimatedText>
-
-            {/* Subheadline */}
-            <AnimatedText animation="fade-up" delay={200}>
-              <p className="text-xl text-[var(--color-fg-muted)] max-w-lg leading-relaxed">
-                Connect with vetted, compassionate caregivers who treat your elderly
-                parents like their own family. Professional in-home care, simplified.
-              </p>
-            </AnimatedText>
-
-            {/* CTA Buttons */}
-            <AnimatedText animation="fade-up" delay={300}>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/register">
-                  <GlassButton variant="primary" size="lg" className="group">
-                    Find a Caregiver
-                    <ArrowRight
-                      className="transition-transform group-hover:translate-x-1"
-                      size={20}
-                    />
-                  </GlassButton>
-                </Link>
-                <Link href="/caregivers">
-                  <GlassButton variant="secondary" size="lg">
-                    Become a Caregiver
-                  </GlassButton>
-                </Link>
-              </div>
-            </AnimatedText>
-
-            {/* Trust Indicators */}
-            <AnimatedText animation="fade-up" delay={400}>
-              <div className="flex items-center gap-6 pt-4">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-10 h-10 rounded-full border-2 border-[var(--color-bg)]",
-                        "bg-gradient-to-br from-brand-accent to-brand-accent-light",
-                        "flex items-center justify-center text-white text-xs font-bold"
-                      )}
-                    >
-                      {["JK", "AM", "SO", "MW"][i - 1]}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-[var(--color-fg-muted)]">
-                  <span className="text-[var(--color-fg)] font-semibold">500+</span> caregivers
-                  joined this month
-                </p>
-              </div>
-            </AnimatedText>
-          </div>
-
-          {/* Right Column - Interactive Visual */}
-          <div className="relative h-[500px] lg:h-[600px] flex items-center justify-center">
-            {/* Central Glass Card */}
-            <AnimatedText animation="scale-in" delay={500}>
-              <GlassCard
-                variant="liquid"
-                className="w-72 md:w-80 h-80 md:h-96 flex items-center justify-center"
-                hover
-              >
-                <div className="text-center space-y-4">
-                  <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-brand-accent to-brand-accent-light flex items-center justify-center">
-                    <Heart className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-[var(--color-fg)]">
-                    Professional Care
-                  </h3>
-                  <p className="text-sm text-[var(--color-fg-muted)] px-4">
-                    Background-checked caregivers ready to help your loved ones
-                  </p>
-                </div>
-              </GlassCard>
-            </AnimatedText>
-
-            {/* Floating Stat Cards */}
-            {floatingStats.map((stat, index) => (
-              <AnimatedText
-                key={stat.label}
-                animation="scale-in"
-                delay={600 + index * 100}
-              >
-                <GlassCard
-                  variant="subtle"
-                  className={cn(
-                    "absolute p-4 min-w-[140px]",
-                    index === 0 && "top-10 -left-4 md:left-0",
-                    index === 1 && "top-1/2 -translate-y-1/2 -right-4 md:-right-8",
-                    index === 2 && "bottom-10 left-4 md:left-10"
-                  )}
-                  hover
-                >
-                  <stat.icon className="w-5 h-5 text-brand-accent mb-2" />
-                  <p className="text-2xl font-bold text-[var(--color-fg)]">{stat.value}</p>
-                  <p className="text-xs text-[var(--color-fg-subtle)]">{stat.label}</p>
-                </GlassCard>
-              </AnimatedText>
-            ))}
-          </div>
+    <section className="min-h-screen pt-20 relative overflow-hidden bg-white dark:bg-dark-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main Content */}
+        <div className="pt-12 lg:pt-20 pb-8">
+          {/* Large Statement */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-[12vw] sm:text-[10vw] lg:text-[8vw] font-bold leading-[0.85] tracking-tight text-dark-900 dark:text-white"
+          >
+            Care for those
+            <br />
+            <span className="text-primary-500">who cared for you.</span>
+          </motion.h1>
         </div>
-      </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className="text-xs text-[var(--color-fg-subtle)] uppercase tracking-widest">
-          Scroll to explore
-        </span>
-        <div className="w-6 h-10 rounded-full border border-[var(--glass-border)] flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-[var(--color-fg-subtle)] rounded-full animate-bounce-soft" />
+        {/* Bento Layout */}
+        <div className="grid grid-cols-12 gap-4 lg:gap-6 pb-20">
+          {/* Description Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="col-span-12 md:col-span-5 lg:col-span-4 bg-dark-900 dark:bg-dark-800 rounded-3xl p-8 flex flex-col justify-between min-h-[280px]"
+          >
+            <p className="text-lg text-dark-300 leading-relaxed">
+              Connect with vetted, compassionate caregivers who treat your elderly
+              parents like family. Professional in-home care, simplified.
+            </p>
+            <div className="flex flex-wrap gap-3 mt-6">
+              <Link href="/register">
+                <Button
+                  size="lg"
+                  className="rounded-full px-6 bg-white text-dark-900 hover:bg-dark-100"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
+                >
+                  Find a Caregiver
+                </Button>
+              </Link>
+              <Link href="/caregivers">
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="rounded-full px-6 text-white hover:bg-dark-800"
+                >
+                  Become a Caregiver
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Main Image - Elderly care */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="col-span-12 md:col-span-7 lg:col-span-5 rounded-3xl overflow-hidden min-h-[280px] group"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&h=600&fit=crop"
+              alt="Caregiver with elderly person"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </motion.div>
+
+          {/* Stats Card 1 - Families Helped */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            className="col-span-6 lg:col-span-3 bg-primary-500 rounded-3xl p-6 flex flex-col justify-center min-h-[140px] lg:min-h-[280px] transition-all duration-200"
+          >
+            <div className="text-4xl lg:text-5xl font-bold text-white">
+              10,000+
+            </div>
+            <div className="text-primary-100 mt-1">Families Helped</div>
+          </motion.div>
+
+          {/* Stats Card 2 - Verified Caregivers */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            className="col-span-6 lg:col-span-3 bg-dark-100 dark:bg-dark-800 rounded-3xl p-6 flex flex-col justify-center min-h-[140px] transition-all duration-200"
+          >
+            <div className="text-4xl lg:text-5xl font-bold text-dark-900 dark:text-white">
+              2,500+
+            </div>
+            <div className="text-dark-500 dark:text-dark-400 mt-1">
+              Verified Caregivers
+            </div>
+          </motion.div>
+
+          {/* Stats Card 3 - Average Rating */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            className="col-span-6 lg:col-span-3 bg-accent-500 rounded-3xl p-6 flex flex-col justify-center min-h-[140px] transition-all duration-200"
+          >
+            <div className="text-4xl lg:text-5xl font-bold text-white">
+              4.9
+            </div>
+            <div className="text-accent-100 mt-1">Average Rating</div>
+          </motion.div>
+
+          {/* Small Image - Caregiver portrait */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="col-span-6 lg:col-span-3 rounded-3xl overflow-hidden min-h-[140px] group"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop"
+              alt="Professional caregiver"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </motion.div>
+
+          {/* Social Proof Card - Full Width on Mobile */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+            className="col-span-12 lg:col-span-6 bg-dark-50 dark:bg-dark-900 rounded-3xl p-6 flex items-center justify-between min-h-[80px]"
+          >
+            <span className="text-dark-600 dark:text-dark-300">
+              Join 500+ caregivers this month
+            </span>
+            <div className="flex -space-x-2">
+              {/* Caregiver avatars */}
+              {[
+                "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop",
+                "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=100&h=100&fit=crop",
+                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+              ].map((src, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: 0.8 + i * 0.1 }}
+                  className="w-10 h-10 rounded-full border-2 border-white dark:border-dark-900 overflow-hidden"
+                >
+                  <img
+                    src={src}
+                    alt="Caregiver"
+                    className="w-full h-full object-cover"
+                  />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

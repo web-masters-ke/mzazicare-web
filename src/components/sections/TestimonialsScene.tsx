@@ -1,12 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Quote, ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { SceneWrapper } from "@/components/layout/SceneWrapper";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { AnimatedText } from "@/components/ui/AnimatedText";
-import { GradientOrb } from "@/components/ui/GradientOrb";
-import { cn } from "@/lib/utils";
+import { Star } from "lucide-react";
+import { motion } from "framer-motion";
+import { Avatar } from "@/components/ui";
 
 const testimonials = [
   {
@@ -17,6 +13,7 @@ const testimonials = [
     role: "Daughter of care recipient",
     location: "Nairobi",
     rating: 5,
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
   },
   {
     id: 2,
@@ -26,6 +23,7 @@ const testimonials = [
     role: "Professional Caregiver",
     location: "Mombasa",
     rating: 5,
+    avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=150&h=150&fit=crop",
   },
   {
     id: 3,
@@ -35,6 +33,7 @@ const testimonials = [
     role: "Son of care recipient",
     location: "Kisumu",
     rating: 5,
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
   },
   {
     id: 4,
@@ -44,163 +43,116 @@ const testimonials = [
     role: "Family caregiver coordinator",
     location: "Nakuru",
     rating: 5,
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop",
+  },
+  {
+    id: 5,
+    content:
+      "The scheduling flexibility is amazing. We needed weekend care and found the perfect match within hours. The booking process couldn't be simpler.",
+    author: "David M.",
+    role: "Son of care recipient",
+    location: "Eldoret",
+    rating: 5,
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop",
+  },
+  {
+    id: 6,
+    content:
+      "Being part of MzaziCare's caregiver network has given me steady work and fair compensation. The families I work with are wonderful and respectful.",
+    author: "Mary A.",
+    role: "Professional Caregiver",
+    location: "Thika",
+    rating: 5,
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop",
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
+
 export function TestimonialsScene() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const nextTestimonial = useCallback(() => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setActiveIndex((prev) => (prev + 1) % testimonials.length);
-    setTimeout(() => setIsAnimating(false), 500);
-  }, [isAnimating]);
-
-  const prevTestimonial = useCallback(() => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setActiveIndex(
-      (prev) => (prev - 1 + testimonials.length) % testimonials.length
-    );
-    setTimeout(() => setIsAnimating(false), 500);
-  }, [isAnimating]);
-
-  // Auto-rotate testimonials
-  useEffect(() => {
-    const interval = setInterval(nextTestimonial, 6000);
-    return () => clearInterval(interval);
-  }, [nextTestimonial]);
-
   return (
-    <SceneWrapper id="testimonials" className="bg-[var(--color-bg-secondary)]" overflow="hidden">
-      <div className="relative max-w-7xl mx-auto px-6">
-        {/* Background */}
-        <GradientOrb
-          color="accent"
-          size="xl"
-          blur="heavy"
-          className="top-0 right-0 opacity-15"
-        />
-        <GradientOrb
-          color="secondary"
-          size="lg"
-          blur="heavy"
-          className="bottom-0 left-0 opacity-10"
-        />
+    <section className="py-24 bg-white dark:bg-dark-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl lg:text-5xl font-bold text-dark-900 dark:text-white mb-4">
+            Trusted by families across Kenya
+          </h2>
+          <p className="text-lg text-dark-600 dark:text-dark-400 max-w-2xl mx-auto">
+            See what families and caregivers are saying about their experience
+          </p>
+        </motion.div>
 
-        {/* Header */}
-        <div className="text-center mb-12 md:mb-16">
-          <AnimatedText animation="fade-up">
-            <p className="text-brand-accent text-sm font-medium uppercase tracking-widest mb-4">
-              Stories of Care
-            </p>
-          </AnimatedText>
-          <AnimatedText animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
-              Families who found{" "}
-              <span className="text-brand-accent">peace of mind</span>
-            </h2>
-          </AnimatedText>
-        </div>
-
-        {/* Testimonial Carousel */}
-        <div className="relative max-w-4xl mx-auto">
-          <AnimatedText animation="scale-in" delay={200}>
-            <GlassCard variant="liquid" className="p-8 md:p-10 relative">
-              {/* Quote Icon */}
-              <Quote className="absolute top-6 right-6 w-16 h-16 text-brand-accent/10" />
+        {/* Testimonials Grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {testimonials.map((testimonial) => (
+            <motion.div
+              key={testimonial.id}
+              variants={itemVariants}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white dark:bg-dark-900 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-dark-100 dark:border-dark-800"
+            >
+              {/* Star Rating */}
+              <div className="flex gap-1 mb-4">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="w-5 h-5 fill-warning-500 text-warning-500"
+                  />
+                ))}
+              </div>
 
               {/* Content */}
-              <div
-                className={cn(
-                  "transition-all duration-500",
-                  isAnimating && "opacity-0 translate-y-4"
-                )}
-              >
-                {/* Stars */}
-                <div className="flex gap-1 mb-6">
-                  {[...Array(testimonials[activeIndex].rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 fill-brand-accent text-brand-accent"
-                    />
-                  ))}
-                </div>
+              <p className="text-dark-700 dark:text-dark-300 leading-relaxed mb-6">
+                "{testimonial.content}"
+              </p>
 
-                {/* Quote */}
-                <blockquote className="text-xl md:text-2xl text-[var(--color-fg)]/90 leading-relaxed mb-8 font-light">
-                  &ldquo;{testimonials[activeIndex].content}&rdquo;
-                </blockquote>
-
-                {/* Author */}
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-accent to-brand-accent-light flex items-center justify-center text-white font-bold text-lg">
-                    {testimonials[activeIndex].author
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[var(--color-fg)]">
-                      {testimonials[activeIndex].author}
-                    </p>
-                    <p className="text-sm text-[var(--color-fg-subtle)]">
-                      {testimonials[activeIndex].role} •{" "}
-                      {testimonials[activeIndex].location}
-                    </p>
-                  </div>
+              {/* Author */}
+              <div className="flex items-center gap-3 pt-4 border-t border-dark-100 dark:border-dark-800">
+                <Avatar
+                  src={testimonial.avatar}
+                  alt={testimonial.author}
+                  size="md"
+                />
+                <div>
+                  <p className="font-semibold text-dark-900 dark:text-white">
+                    {testimonial.author}
+                  </p>
+                  <p className="text-sm text-dark-500 dark:text-dark-500">
+                    {testimonial.role} • {testimonial.location}
+                  </p>
                 </div>
               </div>
-            </GlassCard>
-          </AnimatedText>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between mt-8">
-            {/* Dots */}
-            <div className="flex gap-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    if (!isAnimating) {
-                      setIsAnimating(true);
-                      setActiveIndex(index);
-                      setTimeout(() => setIsAnimating(false), 500);
-                    }
-                  }}
-                  className={cn(
-                    "h-2 rounded-full transition-all duration-300",
-                    activeIndex === index
-                      ? "w-8 bg-brand-accent"
-                      : "w-2 bg-[var(--glass-bg)] hover:bg-[var(--glass-bg-medium)]"
-                  )}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Arrows */}
-            <div className="flex gap-2">
-              <button
-                onClick={prevTestimonial}
-                className="p-3 rounded-full glass-subtle hover:bg-[var(--glass-bg)] transition-colors"
-                aria-label="Previous testimonial"
-              >
-                <ChevronLeft className="w-5 h-5 text-[var(--color-fg)]" />
-              </button>
-              <button
-                onClick={nextTestimonial}
-                className="p-3 rounded-full glass-subtle hover:bg-[var(--glass-bg)] transition-colors"
-                aria-label="Next testimonial"
-              >
-                <ChevronRight className="w-5 h-5 text-[var(--color-fg)]" />
-              </button>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
-    </SceneWrapper>
+    </section>
   );
 }

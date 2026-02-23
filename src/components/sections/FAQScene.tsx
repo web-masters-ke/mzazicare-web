@@ -1,12 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, MessageCircle } from "lucide-react";
-import { SceneWrapper } from "@/components/layout/SceneWrapper";
-import { GlassButton } from "@/components/ui/GlassButton";
-import { AnimatedText } from "@/components/ui/AnimatedText";
-import { GradientOrb } from "@/components/ui/GradientOrb";
-import { cn } from "@/lib/utils";
+import { Plus, Minus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const faqs = [
   {
@@ -51,139 +47,84 @@ const faqs = [
   },
 ];
 
-function FAQItem({
-  faq,
-  isOpen,
-  onToggle,
-  index,
-}: {
-  faq: (typeof faqs)[0];
-  isOpen: boolean;
-  onToggle: () => void;
-  index: number;
-}) {
-  return (
-    <AnimatedText animation="fade-up" delay={200 + index * 50}>
-      <div
-        className={cn(
-          "border-b border-[var(--glass-border)] last:border-b-0",
-          "transition-all duration-300"
-        )}
-      >
-        <button
-          onClick={onToggle}
-          className={cn(
-            "w-full py-6 flex items-start justify-between gap-4 text-left",
-            "group transition-colors"
-          )}
-        >
-          <span
-            className={cn(
-              "text-lg font-medium transition-colors",
-              isOpen ? "text-brand-accent" : "text-[var(--color-fg)] group-hover:text-[var(--color-fg-muted)]"
-            )}
-          >
-            {faq.question}
-          </span>
-          <div
-            className={cn(
-              "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
-              "transition-all duration-300",
-              isOpen
-                ? "bg-brand-accent text-white rotate-180"
-                : "bg-[var(--glass-bg-subtle)] text-[var(--color-fg-subtle)] group-hover:bg-[var(--glass-bg)]"
-            )}
-          >
-            <ChevronDown className="w-5 h-5" />
-          </div>
-        </button>
-        <div
-          className={cn(
-            "overflow-hidden transition-all duration-500",
-            isOpen ? "max-h-96 pb-6" : "max-h-0"
-          )}
-        >
-          <p className="text-[var(--color-fg-muted)] leading-relaxed pr-12">{faq.answer}</p>
-        </div>
-      </div>
-    </AnimatedText>
-  );
-}
-
 export function FAQScene() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const handleToggle = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
   return (
-    <SceneWrapper id="faq" className="bg-[var(--color-bg)]" overflow="hidden">
-      <div className="relative max-w-7xl mx-auto px-6">
-        {/* Background */}
-        <GradientOrb
-          color="secondary"
-          size="xl"
-          blur="heavy"
-          className="-top-32 -left-32 opacity-10"
-        />
+    <section className="py-24 bg-dark-50 dark:bg-dark-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl lg:text-5xl font-bold text-dark-900 dark:text-white mb-4">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-lg text-dark-600 dark:text-dark-400">
+            Everything you need to know about finding and booking elderly care
+          </p>
+        </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left Column - Header */}
-          <div className="lg:sticky lg:top-32 lg:self-start">
-            <AnimatedText animation="fade-up">
-              <p className="text-brand-accent text-sm font-medium uppercase tracking-widest mb-4">
-                Got Questions?
-              </p>
-            </AnimatedText>
-            <AnimatedText animation="fade-up" delay={100}>
-              <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
-                Frequently asked{" "}
-                <span className="text-brand-accent">questions</span>
-              </h2>
-            </AnimatedText>
-            <AnimatedText animation="fade-up" delay={200}>
-              <p className="text-xl text-[var(--color-fg-muted)] mb-8">
-                Can&apos;t find what you&apos;re looking for? Our support team is
-                here to help.
-              </p>
-            </AnimatedText>
-            <AnimatedText animation="fade-up" delay={300}>
-              <GlassButton variant="secondary" className="group">
-                <MessageCircle className="w-5 h-5" />
-                Contact Support
-              </GlassButton>
-            </AnimatedText>
-
-            {/* Stats */}
-            <AnimatedText animation="fade-up" delay={400}>
-              <div className="mt-12 grid grid-cols-2 gap-6">
-                <div className="p-4 rounded-2xl bg-[var(--glass-bg-subtle)]">
-                  <p className="text-3xl font-bold text-[var(--color-fg)] mb-1">{"<"}2min</p>
-                  <p className="text-sm text-[var(--color-fg-subtle)]">Avg. response time</p>
+        {/* FAQ List */}
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              className={`bg-white dark:bg-dark-950 rounded-2xl border-2 transition-all duration-200 ${
+                openIndex === index
+                  ? "border-primary-500 shadow-lg"
+                  : "border-dark-200 dark:border-dark-800"
+              }`}
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left"
+              >
+                <span className="text-lg font-semibold text-dark-900 dark:text-white">
+                  {faq.question}
+                </span>
+                <div
+                  className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center transition-colors ${
+                    openIndex === index
+                      ? "bg-primary-500 text-white"
+                      : "bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-400"
+                  }`}
+                >
+                  {openIndex === index ? (
+                    <Minus className="w-5 h-5" />
+                  ) : (
+                    <Plus className="w-5 h-5" />
+                  )}
                 </div>
-                <div className="p-4 rounded-2xl bg-[var(--glass-bg-subtle)]">
-                  <p className="text-3xl font-bold text-[var(--color-fg)] mb-1">24/7</p>
-                  <p className="text-sm text-[var(--color-fg-subtle)]">Support available</p>
-                </div>
-              </div>
-            </AnimatedText>
-          </div>
+              </button>
 
-          {/* Right Column - FAQ List */}
-          <div className="glass-subtle rounded-3xl p-6 md:p-8">
-            {faqs.map((faq, index) => (
-              <FAQItem
-                key={index}
-                faq={faq}
-                isOpen={openIndex === index}
-                onToggle={() => handleToggle(index)}
-                index={index}
-              />
-            ))}
-          </div>
+              <AnimatePresence>
+                {openIndex === index && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-6 pb-6 text-dark-600 dark:text-dark-400 leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
         </div>
       </div>
-    </SceneWrapper>
+    </section>
   );
 }

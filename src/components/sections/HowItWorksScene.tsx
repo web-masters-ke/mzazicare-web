@@ -1,12 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Search, UserCheck, Calendar, Heart } from "lucide-react";
-import { SceneWrapper } from "@/components/layout/SceneWrapper";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { AnimatedText } from "@/components/ui/AnimatedText";
-import { GradientOrb } from "@/components/ui/GradientOrb";
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const steps = [
   {
@@ -15,8 +10,6 @@ const steps = [
     title: "Tell us your needs",
     description:
       "Share your loved one's care requirements, schedule preferences, and any special considerations.",
-    detail:
-      "Our smart matching system analyzes over 50 criteria to find the perfect caregiver match.",
   },
   {
     icon: UserCheck,
@@ -24,8 +17,6 @@ const steps = [
     title: "Meet verified caregivers",
     description:
       "Browse profiles of background-checked, trained caregivers with verified reviews from other families.",
-    detail:
-      "Every caregiver passes our rigorous 7-step verification process including criminal background checks.",
   },
   {
     icon: Calendar,
@@ -33,8 +24,6 @@ const steps = [
     title: "Schedule care sessions",
     description:
       "Book regular visits or one-time appointments with flexible scheduling that fits your family.",
-    detail:
-      "Manage bookings, track visits, and communicate through our secure family dashboard.",
   },
   {
     icon: Heart,
@@ -42,124 +31,88 @@ const steps = [
     title: "Experience peace of mind",
     description:
       "Stay connected with real-time updates, GPS check-ins, and detailed care reports after each visit.",
-    detail:
-      "Our 24/7 support team is always ready to assist with any concerns or schedule changes.",
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0 },
+};
+
 export function HowItWorksScene() {
-  const [activeStep, setActiveStep] = useState(0);
-
   return (
-    <SceneWrapper id="how-it-works" className="bg-[var(--color-bg)]" overflow="hidden">
-      <div className="relative max-w-7xl mx-auto px-6">
-        {/* Background Decoration */}
-        <GradientOrb
-          color="accent"
-          size="xl"
-          blur="heavy"
-          className="top-0 right-0 opacity-20"
-        />
-
+    <section className="py-24 bg-white dark:bg-dark-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16 md:mb-20">
-          <AnimatedText animation="fade-up">
-            <p className="text-brand-accent text-sm font-medium uppercase tracking-widest mb-4">
-              Simple Process
-            </p>
-          </AnimatedText>
-          <AnimatedText animation="fade-up" delay={100}>
-            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-fg)] mb-6">
-              Finding care shouldn&apos;t be{" "}
-              <span className="text-brand-accent">complicated</span>
-            </h2>
-          </AnimatedText>
-          <AnimatedText animation="fade-up" delay={200}>
-            <p className="text-xl text-[var(--color-fg-muted)] max-w-2xl mx-auto">
-              Four simple steps to connect your loved ones with compassionate,
-              professional caregivers.
-            </p>
-          </AnimatedText>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16"
+        >
+          <p className="text-primary-500 text-sm font-bold uppercase tracking-widest mb-4">
+            Simple Process
+          </p>
+          <h2 className="text-4xl lg:text-5xl font-bold text-dark-900 dark:text-white mb-6">
+            Finding care shouldn't be{" "}
+            <span className="text-primary-500">complicated</span>
+          </h2>
+          <p className="text-xl text-dark-600 dark:text-dark-400 max-w-2xl mx-auto">
+            Four simple steps to connect your loved ones with compassionate,
+            professional caregivers.
+          </p>
+        </motion.div>
 
         {/* Steps Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
           {steps.map((step, index) => (
-            <AnimatedText
+            <motion.div
               key={step.number}
-              animation="fade-up"
-              delay={300 + index * 100}
+              variants={itemVariants}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+              className="relative"
             >
-              <GlassCard
-                variant={activeStep === index ? "liquid" : "subtle"}
-                hover
-                glow={activeStep === index}
-                className={cn(
-                  "h-full relative cursor-pointer",
-                  "transition-all duration-500",
-                  activeStep === index && "scale-[1.02] border-brand-accent/30"
-                )}
-                onClick={() => setActiveStep(index)}
-              >
+              <div className="h-full bg-white dark:bg-dark-900 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-dark-100 dark:border-dark-800">
                 {/* Step Number */}
-                <span className="text-5xl font-bold text-[var(--color-fg)]/5 absolute top-4 right-4">
-                  {step.number}
-                </span>
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-primary-500 rounded-2xl flex items-center justify-center shadow-colored">
+                  <span className="text-xl font-bold text-white">{step.number}</span>
+                </div>
 
                 {/* Icon */}
-                <div
-                  className={cn(
-                    "w-14 h-14 rounded-2xl flex items-center justify-center mb-6",
-                    "transition-all duration-500",
-                    activeStep === index
-                      ? "bg-brand-accent text-white"
-                      : "bg-[var(--glass-bg)] text-[var(--color-fg-muted)]"
-                  )}
-                >
-                  <step.icon size={28} />
+                <div className="w-14 h-14 bg-primary-50 dark:bg-primary-900/20 rounded-2xl flex items-center justify-center mb-6 mt-4">
+                  <step.icon className="w-7 h-7 text-primary-500" />
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-semibold text-[var(--color-fg)] mb-3">
+                <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-3">
                   {step.title}
                 </h3>
-                <p className="text-[var(--color-fg-muted)] text-sm leading-relaxed mb-4">
+                <p className="text-dark-600 dark:text-dark-400 leading-relaxed">
                   {step.description}
                 </p>
-
-                {/* Expanded Detail (Progressive Disclosure) */}
-                <div
-                  className={cn(
-                    "overflow-hidden transition-all duration-500",
-                    activeStep === index
-                      ? "max-h-24 opacity-100"
-                      : "max-h-0 opacity-0"
-                  )}
-                >
-                  <p className="text-brand-accent/80 text-xs leading-relaxed pt-4 border-t border-[var(--glass-border)]">
-                    {step.detail}
-                  </p>
-                </div>
-              </GlassCard>
-            </AnimatedText>
+              </div>
+            </motion.div>
           ))}
-        </div>
-
-        {/* Progress Indicator */}
-        <AnimatedText animation="fade-up" delay={700}>
-          <div className="mt-12 md:mt-16 max-w-md mx-auto">
-            <div className="h-1 bg-[var(--glass-bg)] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-brand-accent rounded-full transition-all duration-500"
-                style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
-              />
-            </div>
-            <p className="text-center text-[var(--color-fg-subtle)] text-sm mt-4">
-              Step {activeStep + 1} of {steps.length}
-            </p>
-          </div>
-        </AnimatedText>
+        </motion.div>
       </div>
-    </SceneWrapper>
+    </section>
   );
 }

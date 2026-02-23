@@ -2,31 +2,25 @@
 
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Linkedin, Heart } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const footerLinks = {
-  product: [
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "Services", href: "#services" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "For Caregivers", href: "/caregivers" },
-  ],
-  company: [
+  Company: [
     { label: "About Us", href: "/about" },
     { label: "Careers", href: "/careers" },
     { label: "Press", href: "/press" },
     { label: "Contact", href: "/contact" },
   ],
-  resources: [
-    { label: "Blog", href: "/blog" },
+  Resources: [
+    { label: "How It Works", href: "#how-it-works" },
+    { label: "For Families", href: "#for-families" },
+    { label: "For Caregivers", href: "/caregivers" },
     { label: "Help Center", href: "/help" },
-    { label: "Safety", href: "/safety" },
-    { label: "Community", href: "/community" },
   ],
-  legal: [
+  Legal: [
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
     { label: "Cookie Policy", href: "/cookies" },
+    { label: "Safety", href: "/safety" },
   ],
 };
 
@@ -39,17 +33,17 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative bg-[var(--color-bg-secondary)] border-t border-[var(--glass-border)]">
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
+    <footer className="bg-dark-900 dark:bg-dark-950 border-t border-dark-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Brand Column */}
           <div className="col-span-2">
             <Link href="/" className="inline-block mb-4">
-              <span className="text-2xl font-bold text-[var(--color-fg)]">
-                Mzazi<span className="text-brand-accent">Care</span>
+              <span className="text-2xl font-bold text-white">
+                Mzazi<span className="text-primary-400">Care</span>
               </span>
             </Link>
-            <p className="text-sm text-[var(--color-fg-muted)] mb-6 max-w-xs leading-relaxed">
+            <p className="text-sm text-dark-400 mb-6 max-w-xs leading-relaxed">
               Connecting families with trusted caregivers for elderly parents.
               Professional in-home care, simplified.
             </p>
@@ -61,12 +55,7 @@ export function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className={cn(
-                    "w-10 h-10 rounded-full glass-subtle",
-                    "flex items-center justify-center",
-                    "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--glass-bg)]",
-                    "transition-all duration-200"
-                  )}
+                  className="w-10 h-10 rounded-full bg-dark-800 dark:bg-dark-900 flex items-center justify-center text-dark-400 hover:text-primary-400 hover:bg-dark-700 dark:hover:bg-dark-800 transition-all duration-200"
                 >
                   <social.icon size={18} />
                 </a>
@@ -77,7 +66,7 @@ export function Footer() {
           {/* Link Columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4 className="text-sm font-semibold text-[var(--color-fg)] uppercase tracking-wider mb-4">
+              <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
                 {category}
               </h4>
               <ul className="space-y-3">
@@ -85,7 +74,7 @@ export function Footer() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] transition-colors duration-200"
+                      className="text-sm text-dark-400 hover:text-white transition-colors duration-200"
                     >
                       {link.label}
                     </Link>
@@ -97,14 +86,12 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-[var(--glass-border)] flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-[var(--color-fg-subtle)]">
-            &copy; {new Date().getFullYear()} MzaziCare. All rights reserved.
+        <div className="pt-8 border-t border-dark-800 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-dark-500">
+          <p>
+            © {new Date().getFullYear()} MzaziCare. All rights reserved.
           </p>
-          <p className="text-sm text-[var(--color-fg-subtle)] flex items-center gap-1">
-            Made with{" "}
-            <Heart size={14} className="text-brand-accent fill-brand-accent" /> in
-            Kenya
+          <p className="flex items-center gap-1">
+            Made with <Heart className="w-4 h-4 text-accent-500 fill-accent-500" /> in Kenya
           </p>
         </div>
       </div>

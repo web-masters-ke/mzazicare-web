@@ -15,47 +15,24 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     <button
       onClick={toggleTheme}
       className={cn(
-        "relative w-14 h-8 rounded-full p-1",
-        "bg-[var(--color-bg-tertiary)] border border-[var(--glass-border)]",
-        "transition-all duration-300 ease-out",
-        "hover:border-[var(--color-accent)]/30",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/50",
+        "fixed bottom-6 right-6 z-50",
+        "w-12 h-12 rounded-full",
+        "bg-white dark:bg-dark-900",
+        "border border-dark-200 dark:border-dark-700",
+        "shadow-lg hover:shadow-xl",
+        "flex items-center justify-center",
+        "transition-all duration-200",
+        "hover:scale-110",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30",
         className
       )}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
-      {/* Track icons */}
-      <div className="absolute inset-0 flex items-center justify-between px-2">
-        <Sun
-          className={cn(
-            "w-3.5 h-3.5 transition-opacity duration-300",
-            theme === "light" ? "opacity-0" : "opacity-40 text-yellow-400"
-          )}
-        />
-        <Moon
-          className={cn(
-            "w-3.5 h-3.5 transition-opacity duration-300",
-            theme === "dark" ? "opacity-0" : "opacity-40 text-slate-400"
-          )}
-        />
-      </div>
-
-      {/* Sliding knob */}
-      <div
-        className={cn(
-          "relative w-6 h-6 rounded-full",
-          "bg-[var(--color-bg)] shadow-md",
-          "flex items-center justify-center",
-          "transition-all duration-300 ease-out",
-          theme === "dark" ? "translate-x-6" : "translate-x-0"
-        )}
-      >
-        {theme === "light" ? (
-          <Sun className="w-3.5 h-3.5 text-amber-500" />
-        ) : (
-          <Moon className="w-3.5 h-3.5 text-indigo-400" />
-        )}
-      </div>
+      {theme === "light" ? (
+        <Sun className="w-5 h-5 text-amber-500" />
+      ) : (
+        <Moon className="w-5 h-5 text-indigo-400" />
+      )}
     </button>
   );
 }
