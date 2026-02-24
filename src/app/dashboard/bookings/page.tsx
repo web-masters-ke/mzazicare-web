@@ -50,6 +50,7 @@ function BookingsContent() {
     const matchesStatus = selectedStatus === 'all' || booking.status === selectedStatus;
     const matchesSearch =
       searchQuery === '' ||
+      booking.elderly?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       booking.elderly?.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       booking.elderly?.lastName?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
@@ -71,13 +72,32 @@ function BookingsContent() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      year: 'numeric',
     }).format(date);
+  };
+
+  const formatDateTime = (dateString: string, timeString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date);
+
+    if (timeString) {
+      return `${formattedDate} at ${timeString}`;
+    }
+
+    return formattedDate;
   };
 
   return (
@@ -167,18 +187,18 @@ function BookingsContent() {
               >
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 rounded-xl bg-primary-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                    {booking.elderly?.firstName?.charAt(0)}
+                    {booking.elderly?.fullName?.charAt(0) || booking.elderly?.firstName?.charAt(0) || 'E'}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <h3 className="font-semibold text-dark-900 dark:text-white truncate">
-                          {booking.elderly?.firstName} {booking.elderly?.lastName}
+                          {booking.elderly?.fullName || `${booking.elderly?.firstName || ''} ${booking.elderly?.lastName || ''}`.trim() || 'Unknown'}
                         </h3>
                         {booking.caregiver && (
                           <p className="text-sm text-dark-600 dark:text-dark-400">
-                            with {booking.caregiver.firstName} {booking.caregiver.lastName}
+                            with {booking.caregiver.user?.fullName || booking.caregiver.fullName || `${booking.caregiver.firstName || ''} ${booking.caregiver.lastName || ''}`.trim() || 'Caregiver'}
                           </p>
                         )}
                       </div>
@@ -190,8 +210,20 @@ function BookingsContent() {
                     <div className="flex flex-wrap gap-3 text-sm text-dark-600 dark:text-dark-400">
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        {formatDate(booking.scheduledStartTime)}
+                        {formatDateTime(booking.scheduledDate, booking.scheduledTime)}
                       </div>
+                      {booking.serviceType && (
+                        <div className="flex items-center gap-1">
+                          <Sparkles className="w-4 h-4" />
+                          {booking.serviceType.name || booking.serviceType.category}
+                        </div>
+                      )}
+                      {booking.duration && (
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {booking.duration} min
+                        </div>
+                      )}
                     </div>
                   </div>
 

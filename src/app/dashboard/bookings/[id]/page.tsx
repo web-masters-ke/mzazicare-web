@@ -10,6 +10,7 @@ import { useMessaging } from '@/hooks/useMessaging';
 import { Button, Badge, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { BookingStatus, UserRole, ConversationType } from '@/types/models';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   Calendar,
@@ -22,6 +23,8 @@ import {
   CheckCircle,
   XCircle,
   MessageSquare,
+  Sparkles,
+  Star,
 } from 'lucide-react';
 
 function BookingDetailsContent() {
@@ -29,16 +32,19 @@ function BookingDetailsContent() {
   const params = useParams();
   const bookingId = params.id as string;
   const { userRole } = useAuth();
-  const { currentBooking, isLoading, fetchBookingById, cancelBooking, rescheduleBooking } = useBookings();
+  const { currentBooking, isLoading, fetchBookingById, cancelBooking, rescheduleBooking, acceptBooking, declineBooking } = useBookings();
   const { createConversation } = useMessaging();
   const [cancelReason, setCancelReason] = useState('');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [newDateTime, setNewDateTime] = useState('');
-  const [newDuration, setNewDuration] = useState('');
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [declineReason, setDeclineReason] = useState('');
 
   useEffect(() => {
     if (bookingId) {
@@ -48,18 +54,21 @@ function BookingDetailsContent() {
 
   const handleCancel = async () => {
     if (!cancelReason.trim()) {
-      alert('Please provide a reason for cancellation');
+      toast.error('Please provide a reason for cancellation');
       return;
     }
 
     setIsCancelling(true);
     try {
       await cancelBooking(bookingId, cancelReason);
+      toast.success('Booking cancelled successfully');
       setShowCancelModal(false);
-      router.push('/dashboard/bookings');
+      setTimeout(() => {
+        router.push('/dashboard/bookings');
+      }, 500);
     } catch (error) {
       console.error('Failed to cancel booking:', error);
-      alert('Failed to cancel booking. Please try again.');
+      toast.error('Failed to cancel booking. Please try again.');
     } finally {
       setIsCancelling(false);
     }
@@ -67,20 +76,30 @@ function BookingDetailsContent() {
 
   const handleReschedule = async () => {
     if (!newDateTime) {
-      alert('Please select a new date and time');
+      toast.error('Please select a new date and time');
       return;
     }
 
     setIsRescheduling(true);
     try {
-      const durationMinutes = newDuration ? Number(newDuration) * 60 : undefined;
-      await rescheduleBooking(bookingId, new Date(newDateTime).toISOString(), durationMinutes);
+      // Parse the datetime-local input
+      const dateTime = new Date(newDateTime);
+
+      // Extract date in ISO format
+      const scheduledDate = dateTime.toISOString();
+
+      // Extract time in HH:MM format
+      const hours = dateTime.getHours().toString().padStart(2, '0');
+      const minutes = dateTime.getMinutes().toString().padStart(2, '0');
+      const scheduledTime = `${hours}:${minutes}`;
+
+      await rescheduleBooking(bookingId, scheduledDate, scheduledTime);
+      toast.success('Booking rescheduled successfully!', { icon: '📅' });
       setShowRescheduleModal(false);
-      alert('Booking rescheduled successfully!');
       fetchBookingById(bookingId);
     } catch (error: any) {
       console.error('Failed to reschedule booking:', error);
-      alert(error.response?.data?.message || error.message || 'Failed to reschedule booking. Please try again.');
+      toast.error(error.response?.data?.message || error.message || 'Failed to reschedule booking. Please try again.');
     } finally {
       setIsRescheduling(false);
     }
@@ -95,7 +114,7 @@ function BookingDetailsContent() {
       : currentBooking.caregiverId;  // Family messages the caregiver
 
     if (!otherUserId) {
-      alert('No caregiver assigned to this booking yet');
+      toast.error('No caregiver assigned to this booking yet');
       return;
     }
 
@@ -108,9 +127,47 @@ function BookingDetailsContent() {
 
       router.push(`/dashboard/messages?conversation=${conversation.id}`);
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to start conversation');
+      toast.error(error.response?.data?.message || 'Failed to start conversation');
     } finally {
       setIsCreatingConversation(false);
+    }
+  };
+
+  const handleAcceptBooking = async () => {
+    setIsAccepting(true);
+    try {
+      await acceptBooking(bookingId);
+      toast.success('Booking accepted successfully!', { icon: '✅' });
+      setTimeout(() => {
+        router.push('/dashboard/bookings');
+      }, 500);
+    } catch (error: any) {
+      console.error('Failed to accept booking:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to accept booking');
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  const handleDeclineBooking = async () => {
+    if (!declineReason.trim()) {
+      toast.error('Please provide a reason for declining');
+      return;
+    }
+
+    setIsDeclining(true);
+    try {
+      await declineBooking(bookingId, declineReason);
+      toast.success('Booking declined', { icon: 'ℹ️' });
+      setShowDeclineModal(false);
+      setTimeout(() => {
+        router.push('/dashboard/bookings');
+      }, 500);
+    } catch (error: any) {
+      console.error('Failed to decline booking:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to decline booking');
+    } finally {
+      setIsDeclining(false);
     }
   };
 
@@ -132,22 +189,47 @@ function BookingDetailsContent() {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     }).format(date);
   };
 
-  const formatDuration = (start: string, end: string) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const hours = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60));
-    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  const formatDateTime = (dateString: string, timeString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date);
+
+    if (timeString) {
+      return `${formattedDate} at ${timeString}`;
+    }
+
+    return formattedDate;
+  };
+
+  const formatDuration = (durationMinutes: number) => {
+    const hours = Math.floor(durationMinutes / 60);
+    const minutes = durationMinutes % 60;
+
+    if (hours > 0 && minutes > 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''} ${minutes} min`;
+    } else if (hours > 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    } else {
+      return `${minutes} minutes`;
+    }
   };
 
   if (isLoading) {
@@ -232,12 +314,23 @@ function BookingDetailsContent() {
                 Schedule
               </h2>
               <div className="space-y-3">
+                {booking.serviceType && (
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="w-5 h-5 text-dark-400 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-dark-600 dark:text-dark-400">Service Type</p>
+                      <p className="font-medium text-dark-900 dark:text-white">
+                        {booking.serviceType.name || booking.serviceType.category}
+                      </p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-start gap-3">
                   <Calendar className="w-5 h-5 text-dark-400 mt-0.5" />
                   <div>
-                    <p className="text-sm text-dark-600 dark:text-dark-400">Start Time</p>
+                    <p className="text-sm text-dark-600 dark:text-dark-400">Scheduled For</p>
                     <p className="font-medium text-dark-900 dark:text-white">
-                      {formatDate(booking.scheduledStartTime)}
+                      {formatDateTime(booking.scheduledDate, booking.scheduledTime)}
                     </p>
                   </div>
                 </div>
@@ -246,10 +339,21 @@ function BookingDetailsContent() {
                   <div>
                     <p className="text-sm text-dark-600 dark:text-dark-400">Duration</p>
                     <p className="font-medium text-dark-900 dark:text-white">
-                      {formatDuration(booking.scheduledStartTime, booking.scheduledEndTime)}
+                      {formatDuration(booking.duration || booking.durationMinutes || 0)}
                     </p>
                   </div>
                 </div>
+                {booking.address && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-dark-400 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-dark-600 dark:text-dark-400">Location</p>
+                      <p className="font-medium text-dark-900 dark:text-white">
+                        {booking.address}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -260,12 +364,20 @@ function BookingDetailsContent() {
                   Care Recipient
                 </h2>
                 <div className="flex items-center gap-4 p-4 bg-dark-50 dark:bg-dark-800 rounded-xl">
-                  <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
-                    <User className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                  </div>
+                  {booking.elderly.photo ? (
+                    <img
+                      src={booking.elderly.photo}
+                      alt={booking.elderly.fullName || 'Elderly'}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
+                      <User className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                    </div>
+                  )}
                   <div>
                     <p className="font-semibold text-dark-900 dark:text-white">
-                      {booking.elderly.firstName} {booking.elderly.lastName}
+                      {booking.elderly.fullName || `${booking.elderly.firstName || ''} ${booking.elderly.lastName || ''}`.trim() || 'Unknown'}
                     </p>
                   </div>
                 </div>
@@ -280,13 +392,29 @@ function BookingDetailsContent() {
                 </h2>
                 <div className="p-4 bg-dark-50 dark:bg-dark-800 rounded-xl space-y-3">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                    </div>
+                    {booking.caregiver.user?.profilePhoto ? (
+                      <img
+                        src={booking.caregiver.user.profilePhoto}
+                        alt={booking.caregiver.user.fullName || 'Caregiver'}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                      </div>
+                    )}
                     <div>
                       <p className="font-semibold text-dark-900 dark:text-white">
-                        {booking.caregiver.firstName} {booking.caregiver.lastName}
+                        {booking.caregiver.user?.fullName || booking.caregiver.fullName || `${booking.caregiver.firstName || ''} ${booking.caregiver.lastName || ''}`.trim() || 'Caregiver'}
                       </p>
+                      {booking.caregiver.rating && booking.caregiver.rating > 0 && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm text-dark-600 dark:text-dark-400">
+                            {booking.caregiver.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -294,13 +422,13 @@ function BookingDetailsContent() {
             )}
 
             {/* Special Instructions */}
-            {booking.specialInstructions && (
+            {(booking.notes || booking.specialInstructions) && (
               <div>
                 <h2 className="text-lg font-semibold text-dark-900 dark:text-white mb-4">
                   Special Instructions
                 </h2>
                 <p className="text-dark-700 dark:text-dark-300 p-4 bg-dark-50 dark:bg-dark-800 rounded-xl">
-                  {booking.specialInstructions}
+                  {booking.notes || booking.specialInstructions}
                 </p>
               </div>
             )}
@@ -318,7 +446,7 @@ function BookingDetailsContent() {
             )}
           </div>
 
-          {/* Actions */}
+          {/* Actions - Family User */}
           {canCancel && userRole === UserRole.FAMILY_USER && (
             <div className="p-6 border-t border-dark-100 dark:border-dark-800 flex gap-3">
               <Button
@@ -342,6 +470,36 @@ function BookingDetailsContent() {
                 leftIcon={<XCircle className="w-5 h-5" />}
               >
                 Cancel Booking
+              </Button>
+            </div>
+          )}
+
+          {/* Actions - Caregiver */}
+          {userRole === UserRole.CAREGIVER && booking.status === BookingStatus.PENDING && (
+            <div className="p-6 border-t border-dark-100 dark:border-dark-800 flex gap-3">
+              <Button
+                variant="secondary"
+                onClick={handleMessage}
+                leftIcon={<MessageSquare className="w-5 h-5" />}
+                disabled={isCreatingConversation}
+              >
+                {isCreatingConversation ? 'Starting...' : 'Message Family'}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => setShowDeclineModal(true)}
+                leftIcon={<XCircle className="w-5 h-5" />}
+                disabled={isAccepting || isDeclining}
+              >
+                Decline
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleAcceptBooking}
+                leftIcon={<CheckCircle className="w-5 h-5" />}
+                disabled={isAccepting || isDeclining}
+              >
+                {isAccepting ? 'Accepting...' : 'Accept Booking'}
               </Button>
             </div>
           )}
@@ -406,32 +564,19 @@ function BookingDetailsContent() {
               Select a new date and time for this booking:
             </p>
 
-            <div className="space-y-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  New Date & Time *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={newDateTime}
-                  onChange={(e) => setNewDateTime(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                  Duration (hours) - Optional
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={newDuration}
-                  onChange={(e) => setNewDuration(e.target.value)}
-                  placeholder="Leave empty to keep current duration"
-                  className="w-full p-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                New Date & Time *
+              </label>
+              <input
+                type="datetime-local"
+                value={newDateTime}
+                onChange={(e) => setNewDateTime(e.target.value)}
+                className="w-full p-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <p className="mt-2 text-sm text-dark-500 dark:text-dark-400">
+                Note: Duration will remain the same ({formatDuration(currentBooking?.duration || currentBooking?.durationMinutes || 0)})
+              </p>
             </div>
 
             <div className="flex gap-3">
@@ -450,6 +595,49 @@ function BookingDetailsContent() {
                 className="flex-1"
               >
                 {isRescheduling ? 'Rescheduling...' : 'Confirm Reschedule'}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Decline Modal */}
+      {showDeclineModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-dark-900 rounded-2xl max-w-md w-full p-6"
+          >
+            <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-4">
+              Decline Booking
+            </h3>
+            <p className="text-dark-600 dark:text-dark-400 mb-4">
+              Please provide a reason for declining this booking:
+            </p>
+            <textarea
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              placeholder="Enter reason for declining..."
+              rows={4}
+              className="w-full p-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => setShowDeclineModal(false)}
+                disabled={isDeclining}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleDeclineBooking}
+                disabled={isDeclining || !declineReason.trim()}
+                className="flex-1"
+              >
+                {isDeclining ? 'Declining...' : 'Confirm Decline'}
               </Button>
             </div>
           </motion.div>

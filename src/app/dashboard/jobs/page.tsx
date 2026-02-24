@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -8,6 +8,7 @@ import { useBookings } from '@/hooks/useBookings';
 import { Button, Badge, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { UserRole, BookingStatus } from '@/types/models';
+import toast from 'react-hot-toast';
 import {
   Briefcase,
   Calendar,
@@ -23,6 +24,10 @@ import {
 function JobsContent() {
   const router = useRouter();
   const { bookings, isLoading, fetchBookings, acceptBooking, declineBooking } = useBookings();
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [declineReason, setDeclineReason] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Fetch pending/available bookings for caregiver
@@ -48,29 +53,71 @@ function JobsContent() {
   };
 
   const handleAccept = async (bookingId: string) => {
-    if (confirm('Accept this job?')) {
-      try {
-        await acceptBooking(bookingId);
-        alert('Job accepted successfully!');
-        // List will auto-update via store
-      } catch (error: any) {
-        console.error('Failed to accept job:', error);
-        alert(error.response?.data?.message || error.message || 'Failed to accept job. Please try again.');
-      }
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="font-medium">Accept this job?</p>
+        <p className="text-sm text-dark-600 dark:text-dark-400">You'll be committed to providing care at the scheduled time.</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              proceedWithAccept(bookingId);
+            }}
+            className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600"
+          >
+            Accept
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1.5 bg-dark-100 dark:bg-dark-800 text-dark-900 dark:text-white rounded-lg text-sm font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+    });
+  };
+
+  const proceedWithAccept = async (bookingId: string) => {
+    setIsProcessing(true);
+    try {
+      await acceptBooking(bookingId);
+      toast.success('Job accepted successfully!', { icon: '✅' });
+    } catch (error: any) {
+      console.error('Failed to accept job:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to accept job. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleDecline = async (bookingId: string) => {
-    const reason = prompt('Please provide a reason for declining:');
-    if (reason) {
-      try {
-        await declineBooking(bookingId, reason);
-        alert('Job declined successfully.');
-        // List will auto-update via store
-      } catch (error: any) {
-        console.error('Failed to decline job:', error);
-        alert(error.response?.data?.message || error.message || 'Failed to decline job. Please try again.');
-      }
+  const handleDecline = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setShowDeclineModal(true);
+  };
+
+  const proceedWithDecline = async () => {
+    if (!declineReason.trim()) {
+      toast.error('Please provide a reason for declining');
+      return;
+    }
+
+    if (!selectedBookingId) return;
+
+    setIsProcessing(true);
+    try {
+      await declineBooking(selectedBookingId, declineReason);
+      toast.success('Job declined successfully');
+      setShowDeclineModal(false);
+      setDeclineReason('');
+      setSelectedBookingId(null);
+    } catch (error: any) {
+      console.error('Failed to decline job:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to decline job. Please try again.');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -237,6 +284,53 @@ function JobsContent() {
           </motion.div>
         )}
       </div>
+
+      {/* Decline Job Modal */}
+      {showDeclineModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-dark-900 rounded-2xl max-w-md w-full p-6"
+          >
+            <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-2">
+              Decline Job
+            </h3>
+            <p className="text-dark-600 dark:text-dark-400 mb-4">
+              Please provide a reason for declining this job:
+            </p>
+            <textarea
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              placeholder="e.g., Schedule conflict, location too far, etc."
+              rows={4}
+              className="w-full px-4 py-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowDeclineModal(false);
+                  setDeclineReason('');
+                  setSelectedBookingId(null);
+                }}
+                disabled={isProcessing}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={proceedWithDecline}
+                disabled={isProcessing || !declineReason.trim()}
+                className="flex-1"
+              >
+                {isProcessing ? 'Declining...' : 'Decline Job'}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       <BottomNav />
     </div>

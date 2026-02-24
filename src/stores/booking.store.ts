@@ -7,11 +7,13 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { bookingRepository } from '@/repositories/booking.repository';
+import { useAuthStore } from '@/stores/auth.store';
 import {
   Booking,
   CreateBookingRequest,
   BookingStatus,
   PaginationMeta,
+  UserRole,
 } from '@/types/models';
 
 // State interface
@@ -55,11 +57,13 @@ export const useBookingStore = create<BookingState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await bookingRepository.getFamilyBookings(
-            status,
-            page,
-            10
-          );
+          // Get user role from auth store
+          const userRole = useAuthStore.getState().user?.role;
+
+          // Call appropriate repository method based on user role
+          const response = userRole === UserRole.CAREGIVER
+            ? await bookingRepository.getCaregiverBookings(status, page, 10)
+            : await bookingRepository.getFamilyBookings(status, page, 10);
 
           set({
             bookings: response.data,
@@ -79,7 +83,14 @@ export const useBookingStore = create<BookingState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const booking = await bookingRepository.getFamilyBookingById(id);
+          // Get user role from auth store
+          const userRole = useAuthStore.getState().user?.role;
+
+          // Call appropriate repository method based on user role
+          const booking = userRole === UserRole.CAREGIVER
+            ? await bookingRepository.getCaregiverBookingById(id)
+            : await bookingRepository.getFamilyBookingById(id);
+
           set({
             currentBooking: booking,
             isLoading: false,
