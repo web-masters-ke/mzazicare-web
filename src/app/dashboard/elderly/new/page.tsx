@@ -8,6 +8,7 @@ import { useElderly } from '@/hooks/useElderly';
 import { Button } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { UserRole, CreateElderlyRequest } from '@/types/models';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   Save,
@@ -35,17 +36,19 @@ function NewElderlyContent() {
     e.preventDefault();
 
     if (!formData.fullName || !formData.address) {
-      alert('Please fill in required fields (Full Name and Address)');
+      toast.error('Please fill in required fields (Full Name and Address)');
       return;
     }
 
     try {
       await createElderly(formData);
-      alert('Elderly profile created successfully!');
-      router.push('/dashboard/elderly');
+      toast.success('Profile created successfully!', { icon: '✅' });
+      setTimeout(() => {
+        router.push('/dashboard/elderly');
+      }, 500);
     } catch (error) {
       console.error('Failed to create elderly profile:', error);
-      alert('Failed to create profile. Please try again.');
+      toast.error('Failed to create profile. Please try again.');
     }
   };
 

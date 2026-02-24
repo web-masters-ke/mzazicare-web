@@ -8,6 +8,7 @@ import { useElderly } from '@/hooks/useElderly';
 import { Button, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { CreateElderlyRequest } from '@/types/models';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   Save,
@@ -68,17 +69,19 @@ function EditElderlyContent() {
     e.preventDefault();
 
     if (!formData.fullName || !formData.address) {
-      alert('Please fill in required fields (Full Name and Address)');
+      toast.error('Please fill in required fields (Full Name and Address)');
       return;
     }
 
     try {
       await updateElderly(elderlyId, formData);
-      alert('Elderly profile updated successfully!');
-      router.push('/dashboard/elderly');
+      toast.success('Profile updated successfully!', { icon: '✅' });
+      setTimeout(() => {
+        router.push('/dashboard/elderly');
+      }, 500);
     } catch (error) {
       console.error('Failed to update elderly profile:', error);
-      alert('Failed to update profile. Please try again.');
+      toast.error('Failed to update profile. Please try again.');
     }
   };
 

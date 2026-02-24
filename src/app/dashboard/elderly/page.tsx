@@ -8,6 +8,7 @@ import { useElderly } from '@/hooks/useElderly';
 import { Button, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { UserRole } from '@/types/models';
+import toast from 'react-hot-toast';
 import {
   Plus,
   Heart,
@@ -33,16 +34,41 @@ function ElderlyContent() {
   }, []);
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name}'s profile?`)) {
-      return;
-    }
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <p className="font-medium">Delete {name}'s profile?</p>
+        <p className="text-sm text-dark-600 dark:text-dark-400">This action cannot be undone.</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+              proceedWithDelete(id, name);
+            }}
+            className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600"
+          >
+            Delete
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1.5 bg-dark-100 dark:bg-dark-800 text-dark-900 dark:text-white rounded-lg text-sm font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+    });
+  };
 
+  const proceedWithDelete = async (id: string, name: string) => {
     setDeletingId(id);
     try {
       await deleteElderly(id);
+      toast.success(`${name}'s profile deleted successfully`);
     } catch (error) {
       console.error('Failed to delete elderly profile:', error);
-      alert('Failed to delete profile. Please try again.');
+      toast.error('Failed to delete profile. Please try again.');
     } finally {
       setDeletingId(null);
     }

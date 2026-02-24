@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth';
 import { BottomNav } from '@/components/layout/BottomNav';
-import { Button, Badge, StatCard } from '@/components/ui';
+import { DashboardNav } from '@/components/layout/DashboardNav';
+import { Button, Badge, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { UserRole } from '@/types/models';
+import toast from 'react-hot-toast';
 import {
   TrendingUp,
   DollarSign,
@@ -16,89 +18,111 @@ import {
   ArrowUpRight,
   CheckCircle,
 } from 'lucide-react';
+import { caregiverRepository } from '@/repositories/caregiver.repository';
+import { useBookings } from '@/hooks/useBookings';
+
+interface EarningsData {
+  totalEarnings: string | number;
+  availableBalance: string | number;
+  thisWeek: {
+    amount: number;
+    jobs: number;
+  };
+  thisMonth: {
+    amount: number;
+    jobs: number;
+  };
+  allTime: {
+    amount: number;
+    jobs: number;
+  };
+}
 
 function EarningsContent() {
   const router = useRouter();
+  const { bookings, fetchBookings, isLoading: bookingsLoading } = useBookings();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
+  const [earnings, setEarnings] = useState<EarningsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock earnings data
-  const stats = [
-    {
-      name: 'Total Earnings',
-      value: 'KES 45,280',
-      icon: DollarSign,
-      color: 'bg-green-500',
-      change: '+15.3%',
-    },
-    {
-      name: 'This Month',
-      value: 'KES 12,450',
-      icon: TrendingUp,
-      color: 'bg-blue-500',
-      change: '+8.2%',
-    },
-    {
-      name: 'Jobs Completed',
-      value: '28',
-      icon: CheckCircle,
-      color: 'bg-purple-500',
-      change: '+12',
-    },
-    {
-      name: 'Avg Hourly Rate',
-      value: 'KES 650',
-      icon: Clock,
-      color: 'bg-orange-500',
-      change: '+5.1%',
-    },
-  ];
+  useEffect(() => {
+    loadEarningsData();
+    fetchBookings();
+  }, []);
 
-  const earnings = [
-    {
-      id: '1',
-      bookingId: 'BK-2024-001',
-      clientName: 'Mary Smith',
-      elderlyName: 'John Smith',
-      date: '2026-02-20',
-      hours: 4,
-      rate: 600,
-      amount: 2400,
-      status: 'paid',
-    },
-    {
-      id: '2',
-      bookingId: 'BK-2024-002',
-      clientName: 'Jane Doe',
-      elderlyName: 'Alice Doe',
-      date: '2026-02-18',
-      hours: 6,
-      rate: 650,
-      amount: 3900,
-      status: 'paid',
-    },
-    {
-      id: '3',
-      bookingId: 'BK-2024-003',
-      clientName: 'Robert Johnson',
-      elderlyName: 'Margaret Johnson',
-      date: '2026-02-15',
-      hours: 5,
-      rate: 600,
-      amount: 3000,
-      status: 'pending',
-    },
-    {
-      id: '4',
-      bookingId: 'BK-2024-004',
-      clientName: 'Sarah Wilson',
-      elderlyName: 'Thomas Wilson',
-      date: '2026-02-12',
-      hours: 3,
-      rate: 650,
-      amount: 1950,
-      status: 'paid',
-    },
-  ];
+  const loadEarningsData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await caregiverRepository.getEarnings();
+      setEarnings(data);
+    } catch (error) {
+      console.error('Failed to load earnings:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Calculate stats based on real data
+  const calculateStats = () => {
+    if (!earnings) return [];
+
+    const periodData = selectedPeriod === 'week'
+      ? earnings.thisWeek
+      : selectedPeriod === 'month'
+      ? earnings.thisMonth
+      : earnings.allTime;
+
+    const totalEarnings = typeof earnings.totalEarnings === 'string'
+      ? parseFloat(earnings.totalEarnings)
+      : earnings.totalEarnings;
+
+    const availableBalance = typeof earnings.availableBalance === 'string'
+      ? parseFloat(earnings.availableBalance)
+      : earnings.availableBalance;
+
+    // Calculate average hourly rate (rough estimate based on completed jobs)
+    const avgHourlyRate = earnings.allTime.jobs > 0
+      ? Math.round(earnings.allTime.amount / (earnings.allTime.jobs * 4)) // Assuming avg 4 hours per job
+      : 0;
+
+    return [
+      {
+        name: 'Total Earnings',
+        value: `KES ${totalEarnings.toLocaleString()}`,
+        icon: DollarSign,
+        color: 'bg-green-500',
+        change: '',
+      },
+      {
+        name: `This ${selectedPeriod}`,
+        value: `KES ${periodData.amount.toLocaleString()}`,
+        icon: TrendingUp,
+        color: 'bg-blue-500',
+        change: '',
+      },
+      {
+        name: 'Jobs Completed',
+        value: earnings.allTime.jobs.toString(),
+        icon: CheckCircle,
+        color: 'bg-purple-500',
+        change: '',
+      },
+      {
+        name: 'Available Balance',
+        value: `KES ${availableBalance.toLocaleString()}`,
+        icon: Clock,
+        color: 'bg-orange-500',
+        change: '',
+      },
+    ];
+  };
+
+  const stats = calculateStats();
+
+  // Filter completed bookings with payment info
+  const completedBookingsWithPayments = bookings.filter(
+    (booking) => booking.status === 'COMPLETED' && booking.payment
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -113,8 +137,34 @@ function EarningsContent() {
     }
   };
 
+  if (isLoading || bookingsLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-dark-950">
+        <DashboardNav />
+        <div className="flex justify-center items-center py-20">
+          <Spinner size="lg" />
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  if (!earnings) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-dark-950">
+        <DashboardNav />
+        <div className="flex flex-col items-center justify-center py-20">
+          <p className="text-dark-600 dark:text-dark-400 mb-4">Failed to load earnings data</p>
+          <Button onClick={loadEarningsData}>Try Again</Button>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-dark-950">
+      <DashboardNav />
       <div className="relative pb-24 pt-8 px-4 sm:px-6">
         {/* Header */}
         <motion.div
@@ -133,7 +183,7 @@ function EarningsContent() {
             </div>
             <Button
               variant="secondary"
-              onClick={() => alert('Export feature coming soon!')}
+              onClick={() => toast('Export feature coming soon!', { icon: '🚧' })}
               leftIcon={<Download className="w-5 h-5" />}
               className="mt-4 sm:mt-0"
             >
@@ -180,9 +230,11 @@ function EarningsContent() {
                   <div className={`${stat.color} p-3 rounded-2xl`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                    {stat.change}
-                  </span>
+                  {stat.change && (
+                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                      {stat.change}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-2xl font-bold text-dark-900 dark:text-white mb-1">
                   {stat.value}
@@ -235,57 +287,67 @@ function EarningsContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-100 dark:divide-dark-800">
-                {earnings.map((earning) => (
-                  <tr
-                    key={earning.id}
-                    className="hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <p className="text-sm font-medium text-dark-900 dark:text-white">
-                          {earning.bookingId}
-                        </p>
-                        <p className="text-xs text-dark-600 dark:text-dark-400">
-                          {earning.elderlyName}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-dark-900 dark:text-white">
-                        {earning.clientName}
+                {completedBookingsWithPayments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center">
+                      <p className="text-dark-600 dark:text-dark-400">
+                        No payment history yet. Complete jobs to see earnings here.
                       </p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-dark-900 dark:text-white">
-                        {new Date(earning.date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-dark-900 dark:text-white">
-                        {earning.hours}h
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm text-dark-900 dark:text-white">
-                        KES {earning.rate}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-semibold text-dark-900 dark:text-white">
-                        KES {earning.amount.toLocaleString()}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge className={getStatusColor(earning.status)}>
-                        {earning.status}
-                      </Badge>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  completedBookingsWithPayments.map((booking) => (
+                    <tr
+                      key={booking.id}
+                      className="hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <p className="text-sm font-medium text-dark-900 dark:text-white">
+                            {booking.id.slice(0, 8)}
+                          </p>
+                          <p className="text-xs text-dark-600 dark:text-dark-400">
+                            {booking.elderly?.fullName || 'N/A'}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <p className="text-sm text-dark-900 dark:text-white">
+                          {booking.user?.fullName || 'Unknown'}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <p className="text-sm text-dark-900 dark:text-white">
+                          {new Date(booking.scheduledDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <p className="text-sm text-dark-900 dark:text-white">
+                          {Math.round(booking.duration / 60)}h
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <p className="text-sm text-dark-900 dark:text-white">
+                          KES {Math.round((booking.payment?.amount || 0) / (booking.duration / 60))}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <p className="text-sm font-semibold text-dark-900 dark:text-white">
+                          KES {(booking.payment?.amount || 0).toLocaleString()}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Badge className={getStatusColor(booking.payment?.status || 'pending')}>
+                          {booking.payment?.status || 'pending'}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
               </table>
             </div>
@@ -293,7 +355,7 @@ function EarningsContent() {
             {/* Pagination */}
             <div className="p-4 border-t border-dark-100 dark:border-dark-800 flex items-center justify-between">
               <p className="text-sm text-dark-600 dark:text-dark-400">
-                Showing 1 to {earnings.length} of {earnings.length} entries
+                Showing 1 to {completedBookingsWithPayments.length} of {completedBookingsWithPayments.length} entries
               </p>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" disabled>
@@ -319,19 +381,33 @@ function EarningsContent() {
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-dark-900 dark:text-white mb-2">
-                Next Payout
+                Request Payout
               </h3>
               <p className="text-dark-700 dark:text-dark-300 mb-4">
-                Your next payout of <strong>KES 3,000</strong> is scheduled for{' '}
-                <strong>March 1, 2026</strong>. Payouts are processed on the 1st and 15th of each month.
+                Your available balance is{' '}
+                <strong>
+                  KES {(typeof earnings.availableBalance === 'string'
+                    ? parseFloat(earnings.availableBalance)
+                    : earnings.availableBalance).toLocaleString()}
+                </strong>.
+                {' '}Payouts are processed within 24 hours and require a minimum balance of KES 100.
               </p>
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => router.push('/dashboard/settings')}
+                onClick={() => {
+                  const balance = typeof earnings.availableBalance === 'string'
+                    ? parseFloat(earnings.availableBalance)
+                    : earnings.availableBalance;
+                  if (balance < 100) {
+                    toast.error('Minimum payout amount is KES 100. Complete more jobs to reach the minimum.');
+                  } else {
+                    router.push('/dashboard/payout');
+                  }
+                }}
                 rightIcon={<ArrowUpRight className="w-4 h-4" />}
               >
-                Update Payout Method
+                Request Payout
               </Button>
             </div>
           </div>
