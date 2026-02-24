@@ -26,6 +26,14 @@ interface WalletState {
   // Actions
   fetchWallet: () => Promise<void>;
   topUpWallet: (data: TopUpWalletRequest) => Promise<TopUpWalletResponse>;
+  getTopUpStatus: (checkoutRequestId: string) => Promise<{
+    checkoutRequestId: string;
+    status: 'pending' | 'completed' | 'failed';
+    amount: number;
+    mpesaRef?: string;
+    createdAt: string;
+    description: string;
+  }>;
   withdrawFromWallet: (data: WithdrawWalletRequest) => Promise<WithdrawWalletResponse>;
   fetchTransactions: (page?: number, limit?: number) => Promise<void>;
   fetchTransactionById: (id: string) => Promise<Transaction>;
@@ -122,6 +130,15 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         error: error.response?.data?.message || error.message || 'Failed to fetch transaction',
         isLoading: false,
       });
+      throw error;
+    }
+  },
+
+  getTopUpStatus: async (checkoutRequestId: string) => {
+    try {
+      const status = await walletRepository.getTopUpStatus(checkoutRequestId);
+      return status;
+    } catch (error: any) {
       throw error;
     }
   },

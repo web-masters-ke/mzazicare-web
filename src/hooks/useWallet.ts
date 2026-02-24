@@ -16,6 +16,7 @@ export function useWallet() {
 
   const fetchWallet = useWalletStore((state) => state.fetchWallet);
   const topUpWallet = useWalletStore((state) => state.topUpWallet);
+  const getTopUpStatus = useWalletStore((state) => state.getTopUpStatus);
   const withdrawFromWallet = useWalletStore((state) => state.withdrawFromWallet);
   const fetchTransactions = useWalletStore((state) => state.fetchTransactions);
   const fetchTransactionById = useWalletStore((state) => state.fetchTransactionById);
@@ -35,6 +36,7 @@ export function useWallet() {
     // Actions
     fetchWallet,
     topUpWallet,
+    getTopUpStatus,
     withdrawFromWallet,
     fetchTransactions,
     fetchTransactionById,

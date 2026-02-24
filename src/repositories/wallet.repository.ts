@@ -102,6 +102,28 @@ export class WalletRepository {
   }
 
   /**
+   * Get top-up status by checkout request ID
+   */
+  async getTopUpStatus(checkoutRequestId: string): Promise<{
+    checkoutRequestId: string;
+    status: 'pending' | 'completed' | 'failed';
+    amount: number;
+    mpesaRef?: string;
+    createdAt: string;
+    description: string;
+  }> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(
+        `${ApiEndpoints.wallet.topUp}/status/${checkoutRequestId}`
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Extract data from API response
    */
   private extractData<T>(response: ApiResponse<T>): T {

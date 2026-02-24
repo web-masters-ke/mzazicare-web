@@ -8,6 +8,8 @@ import { Button, Badge, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { UserRole } from '@/types/models';
 import { useWallet } from '@/hooks/useWallet';
+import toast from 'react-hot-toast';
+import { PaymentStatusModal } from '@/components/wallet/PaymentStatusModal';
 import {
   Wallet,
   Plus,
@@ -44,6 +46,9 @@ function WalletContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [topUpSuccess, setTopUpSuccess] = useState(false);
   const [topUpError, setTopUpError] = useState<string | null>(null);
+  const [showPaymentStatusModal, setShowPaymentStatusModal] = useState(false);
+  const [currentCheckoutRequestId, setCurrentCheckoutRequestId] = useState<string | null>(null);
+  const [currentTopUpAmount, setCurrentTopUpAmount] = useState<number>(0);
 
   const quickAmounts = [500, 1000, 2000, 5000];
 
@@ -54,12 +59,12 @@ function WalletContent() {
 
   const handleTopUp = async () => {
     if (!topUpAmount || Number(topUpAmount) < 100) {
-      alert('Please enter a valid amount (minimum KES 100)');
+      toast.error('Please enter a valid amount (minimum KES 100)');
       return;
     }
 
     if (!phoneNumber || !phoneNumber.match(/^(\+254|0)[17]\d{8}$/)) {
-      alert('Please enter a valid Kenyan phone number');
+      toast.error('Please enter a valid Kenyan phone number');
       return;
     }
 
@@ -77,27 +82,30 @@ function WalletContent() {
       }
 
       const response = await topUpWallet({
-        phoneNumber: formattedPhone,
+        phone: formattedPhone,
         amount: Number(topUpAmount),
       });
 
       setTopUpSuccess(true);
+      const topUpAmountValue = Number(topUpAmount);
       setTopUpAmount('');
 
       // Show success message
-      alert(`M-Pesa STK Push sent! Please check your phone and enter your M-Pesa PIN.\n\nCheckout Request ID: ${response.checkoutRequestId}`);
+      toast.success(`M-Pesa STK Push sent! Check your phone for the PIN prompt.`, {
+        duration: 4000,
+        icon: '📱',
+      });
 
       setShowTopUpModal(false);
 
-      // Refresh wallet and transactions after a delay to allow for callback processing
-      setTimeout(() => {
-        fetchWallet();
-        fetchTransactions();
-      }, 5000);
+      // Show payment status modal with polling
+      setCurrentCheckoutRequestId(response.checkoutRequestId);
+      setCurrentTopUpAmount(topUpAmountValue);
+      setShowPaymentStatusModal(true);
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to initiate top-up';
       setTopUpError(errorMessage);
-      alert(`Top-up failed: ${errorMessage}`);
+      toast.error(`Top-up failed: ${errorMessage}`);
     } finally {
       setIsProcessing(false);
     }
@@ -105,18 +113,18 @@ function WalletContent() {
 
   const handleWithdraw = async () => {
     if (!withdrawAmount || Number(withdrawAmount) < 100) {
-      alert('Please enter a valid amount (minimum KES 100)');
+      toast.error('Please enter a valid amount (minimum KES 100)');
       return;
     }
 
     if (!wallet || Number(withdrawAmount) > wallet.balance) {
-      alert('Insufficient balance');
+      toast.error('Insufficient balance');
       return;
     }
 
     if (withdrawMethod === 'MPESA') {
       if (!withdrawPhone || !withdrawPhone.match(/^(\+254|0)[17]\d{8}$/)) {
-        alert('Please enter a valid Kenyan phone number');
+        toast.error('Please enter a valid Kenyan phone number');
         return;
       }
     }
@@ -140,14 +148,17 @@ function WalletContent() {
         phoneNumber: withdrawMethod === 'MPESA' ? formattedPhone : undefined,
       });
 
-      alert(`Withdrawal initiated successfully!\n\n${response.message}\n\nTransaction ID: ${response.transactionId}`);
+      toast.success('Withdrawal initiated successfully!', {
+        icon: '✅',
+        duration: 5000,
+      });
 
       setWithdrawAmount('');
       setWithdrawPhone('');
       setShowWithdrawModal(false);
     } catch (error: any) {
       console.error('Withdrawal error:', error);
-      alert(error.response?.data?.message || error.message || 'Failed to process withdrawal. Please try again.');
+      toast.error(error.response?.data?.message || error.message || 'Failed to process withdrawal. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -545,6 +556,29 @@ function WalletContent() {
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Payment Status Modal */}
+      {showPaymentStatusModal && currentCheckoutRequestId && (
+        <PaymentStatusModal
+          checkoutRequestId={currentCheckoutRequestId}
+          amount={currentTopUpAmount}
+          onSuccess={() => {
+            setShowPaymentStatusModal(false);
+            setCurrentCheckoutRequestId(null);
+            toast.success('Wallet topped up successfully!', { icon: '✅' });
+            // Refresh wallet and transactions
+            fetchWallet();
+            fetchTransactions();
+          }}
+          onClose={() => {
+            setShowPaymentStatusModal(false);
+            setCurrentCheckoutRequestId(null);
+            // Refresh anyway in case payment completed
+            fetchWallet();
+            fetchTransactions();
+          }}
+        />
       )}
 
       <BottomNav />
