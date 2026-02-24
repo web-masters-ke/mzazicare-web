@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth';
 import { BottomNav } from '@/components/layout/BottomNav';
@@ -87,6 +87,7 @@ function MessagesContent() {
   const currentUserId = useRef<string>(user?.id || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFetchedConversationId = useRef<string | null>(null);
 
   useEffect(() => {
     currentUserId.current = user?.id || '';
@@ -101,20 +102,32 @@ function MessagesContent() {
     return () => {
       messagingSocket.disconnect();
     };
-  }, [user, fetchConversations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     const conversationId = searchParams.get('conversation');
     if (conversationId && conversations.length > 0) {
-      const conversation = conversations.find((c) => c.id === conversationId);
-      if (conversation) {
-        handleSelectConversation(conversation.id);
+      // Only select if not already selected to prevent unnecessary re-fetches
+      if (!currentConversation || currentConversation.id !== conversationId) {
+        const conversation = conversations.find((c) => c.id === conversationId);
+        if (conversation) {
+          handleSelectConversation(conversation.id);
+        }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, conversations]);
 
   useEffect(() => {
-    if (currentConversation) {
+    if (!currentConversation) {
+      lastFetchedConversationId.current = null;
+      return;
+    }
+
+    if (currentConversation.id !== lastFetchedConversationId.current) {
+      lastFetchedConversationId.current = currentConversation.id;
+
       fetchMessages(currentConversation.id);
       markAsRead(currentConversation.id);
       messagingSocket.joinConversation(currentConversation.id);
@@ -125,14 +138,21 @@ function MessagesContent() {
       return () => {
         messagingSocket.leaveConversation(currentConversation.id);
       };
+    } else {
+      // Already fetched, just join conversation
+      messagingSocket.joinConversation(currentConversation.id);
+      return () => {
+        messagingSocket.leaveConversation(currentConversation.id);
+      };
     }
-  }, [currentConversation, fetchMessages, markAsRead]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentConversation?.id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const loadPinnedMessages = async () => {
+  const loadPinnedMessages = useCallback(async () => {
     if (!currentConversation) return;
     try {
       const pinned = await getPinnedMessages(currentConversation.id);
@@ -140,14 +160,16 @@ function MessagesContent() {
     } catch (error) {
       console.error('Failed to load pinned messages:', error);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentConversation?.id]);
 
-  const handleSelectConversation = (conversationId: string) => {
+  const handleSelectConversation = useCallback((conversationId: string) => {
     const conversation = conversations.find((c) => c.id === conversationId);
     if (conversation) {
       setCurrentConversation(conversation);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversations]);
 
   const filteredConversations = conversations.filter((conversation) => {
     const otherParticipant = conversation.participants.find(
