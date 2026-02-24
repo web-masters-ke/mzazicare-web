@@ -1000,3 +1000,18 @@ input:focus, textarea:focus, select:focus, button:focus {
 .animate-slide-in-right {
   animation: slide-in-right 0.6s ease-out;
 }
+
+/* ============================================
+   TOAST NOTIFICATIONS
+   ============================================ */
+:root {
+  --toast-bg: #ffffff;
+  --toast-text: #1C1917;
+  --toast-border: #E7E5E4;
+}
+
+:root.dark {
+  --toast-bg: #292524;
+  --toast-text: #FAFAF9;
+  --toast-border: #44403C;
+}
