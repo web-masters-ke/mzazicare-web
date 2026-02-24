@@ -216,13 +216,34 @@ export interface BookingVisitInfo {
   reportNotes?: string;
 }
 
+export interface ServiceType {
+  id: string;
+  category: ServiceCategory;
+  name: string;
+  description: string;
+  icon?: string;
+  basePrice: number;
+  pricePerHour: number;
+  minDuration: number;
+  maxDuration: number;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface CreateBookingRequest {
   elderlyId: string;
+  serviceTypeId: string;
+  scheduledDate: string;
+  scheduledTime: string;
+  duration: number;
+  address: string;
+  latitude?: number;
+  longitude?: number;
+  notes?: string;
   caregiverId?: string;
-  serviceType: ServiceCategory;
-  scheduledStartTime: string;
-  durationMinutes: number;
-  specialInstructions?: string;
+  assignmentMode?: 'FAMILY_SELECTS' | 'OPEN_FOR_CLAIM' | 'DIRECT_ASSIGN';
+  escrowReleaseMode?: 'AUTO_RELEASE' | 'FAMILY_APPROVAL';
 }
 
 export interface CancelBookingRequest {
@@ -230,8 +251,8 @@ export interface CancelBookingRequest {
 }
 
 export interface RescheduleBookingRequest {
-  scheduledStartTime: string;
-  durationMinutes?: number;
+  scheduledDate: string;
+  scheduledTime: string;
 }
 
 export interface AssignCaregiverRequest {

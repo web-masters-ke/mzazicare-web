@@ -30,8 +30,8 @@ export interface BookingState {
   cancelBooking: (id: string, reason: string) => Promise<void>;
   rescheduleBooking: (
     id: string,
-    scheduledStartTime: string,
-    durationMinutes?: number
+    scheduledDate: string,
+    scheduledTime: string
   ) => Promise<void>;
   assignCaregiver: (bookingId: string, caregiverId: string) => Promise<void>;
   acceptBooking: (bookingId: string) => Promise<void>;
@@ -148,15 +148,15 @@ export const useBookingStore = create<BookingState>()(
       // Reschedule booking
       rescheduleBooking: async (
         id: string,
-        scheduledStartTime: string,
-        durationMinutes?: number
+        scheduledDate: string,
+        scheduledTime: string
       ) => {
         set({ isLoading: true, error: null });
 
         try {
           const updatedBooking = await bookingRepository.rescheduleBooking(id, {
-            scheduledStartTime,
-            durationMinutes,
+            scheduledDate,
+            scheduledTime,
           });
 
           // Update in bookings list
