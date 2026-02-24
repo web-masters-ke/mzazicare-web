@@ -48,11 +48,12 @@ export class MessagingRepository {
    */
   async getConversations(): Promise<Conversation[]> {
     try {
-      const response = await apiClient.get<ApiResponse<Conversation[]>>(
+      const response = await apiClient.get<ApiResponse<{ conversations: Conversation[], pagination: any }>>(
         ApiEndpoints.messaging.getConversations
       );
 
-      return this.extractData(response.data);
+      const data = this.extractData(response.data);
+      return data.conversations;
     } catch (error) {
       throw error;
     }
@@ -174,9 +175,13 @@ export class MessagingRepository {
         queryParams.toString() ? `?${queryParams.toString()}` : ''
       }`;
 
-      const response = await apiClient.get<ApiResponse<PaginatedResponse<Message>>>(url);
+      const response = await apiClient.get<ApiResponse<{ messages: Message[], pagination: any }>>(url);
 
-      return this.extractPaginatedData(response.data);
+      const data = this.extractData(response.data);
+      return {
+        data: data.messages,
+        pagination: data.pagination,
+      };
     } catch (error) {
       throw error;
     }
@@ -211,7 +216,7 @@ export class MessagingRepository {
     try {
       await apiClient.post(
         ApiEndpoints.messaging.markAsRead(conversationId),
-        { messageIds }
+        messageIds ? { messageIds } : {}
       );
     } catch (error) {
       throw error;
@@ -350,8 +355,7 @@ export class MessagingRepository {
   ): Promise<PinnedMessage> {
     try {
       const response = await apiClient.post<ApiResponse<PinnedMessage>>(
-        ApiEndpoints.messaging.pinMessage(conversationId),
-        { messageId }
+        `/messaging/conversations/${conversationId}/pin/${messageId}`
       );
 
       return this.extractData(response.data);
@@ -363,11 +367,9 @@ export class MessagingRepository {
   /**
    * Unpin a message
    */
-  async unpinMessage(conversationId: string, messageId: string): Promise<void> {
+  async unpinMessage(messageId: string): Promise<void> {
     try {
-      await apiClient.delete(
-        ApiEndpoints.messaging.unpinMessage(conversationId, messageId)
-      );
+      await apiClient.delete(ApiEndpoints.messaging.unpinMessage(messageId));
     } catch (error) {
       throw error;
     }

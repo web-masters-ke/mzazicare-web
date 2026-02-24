@@ -65,7 +65,7 @@ interface MessagingState {
 
   // Actions - Pinned Messages
   pinMessage: (conversationId: string, messageId: string) => Promise<void>;
-  unpinMessage: (conversationId: string, messageId: string) => Promise<void>;
+  unpinMessage: (messageId: string) => Promise<void>;
   fetchPinnedMessages: (conversationId: string) => Promise<void>;
 
   // Actions - Scheduled Messages
@@ -458,10 +458,10 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     }
   },
 
-  unpinMessage: async (conversationId: string, messageId: string) => {
+  unpinMessage: async (messageId: string) => {
     set({ error: null });
     try {
-      await messagingRepository.unpinMessage(conversationId, messageId);
+      await messagingRepository.unpinMessage(messageId);
       set((state) => ({
         pinnedMessages: state.pinnedMessages.filter((p) => p.messageId !== messageId),
       }));
