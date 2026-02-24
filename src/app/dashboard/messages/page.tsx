@@ -10,6 +10,7 @@ import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { messagingSocket } from '@/services/websocket/messaging.socket';
 import { Message, MessageType, PinnedMessage } from '@/types/messaging';
+import toast from 'react-hot-toast';
 import {
   MessageSquare,
   Send,
@@ -293,7 +294,7 @@ function MessagesContent() {
       loadPinnedMessages();
     } catch (error) {
       console.error('Failed to unpin message:', error);
-      alert('Failed to unpin message');
+      toast.error('Failed to unpin message');
     }
   };
 
@@ -330,9 +331,9 @@ function MessagesContent() {
       setScheduleDate('');
       setScheduleTime('');
       setMessageText('');
-      alert('Message scheduled successfully!');
+      toast.success('Message scheduled successfully!', { icon: '⏰' });
     } catch (error: any) {
-      alert(error.message || 'Failed to schedule message');
+      toast.error(error.message || 'Failed to schedule message');
     }
   };
 
@@ -344,9 +345,10 @@ function MessagesContent() {
       setShowForwardModal(false);
       setForwardMessageId(null);
       setSelectedForwardConversations([]);
-      alert('Message forwarded successfully!');
+      toast.success('Message forwarded successfully!', { icon: '✅' });
     } catch (error) {
       console.error('Failed to forward message:', error);
+      toast.error('Failed to forward message');
     }
   };
 

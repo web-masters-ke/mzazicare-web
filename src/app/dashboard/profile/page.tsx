@@ -8,6 +8,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import {
   User,
   Users,
@@ -229,7 +230,7 @@ function ProfileContent() {
               icon={<CreditCard className="w-5 h-5" />}
               title="Payment Methods"
               subtitle="Manage payment options"
-              onClick={() => alert('Payment methods coming soon')}
+              onClick={() => toast('Payment methods coming soon', { icon: '🚧' })}
             />
           </div>
         </motion.div>
@@ -249,14 +250,14 @@ function ProfileContent() {
               icon={<Bell className="w-5 h-5" />}
               title="Notifications"
               subtitle="Manage notification preferences"
-              onClick={() => alert('Notifications settings coming soon')}
+              onClick={() => toast('Notifications settings coming soon', { icon: '🚧' })}
             />
             <div className="border-t border-dark-100 dark:border-dark-800" />
             <MenuItem
               icon={<Globe className="w-5 h-5" />}
               title="Language"
               subtitle="English"
-              onClick={() => alert('Language selection coming soon')}
+              onClick={() => toast('Language selection coming soon', { icon: '🚧' })}
             />
             <div className="border-t border-dark-100 dark:border-dark-800" />
             <MenuItem
@@ -283,21 +284,21 @@ function ProfileContent() {
               icon={<HelpCircle className="w-5 h-5" />}
               title="Help Center"
               subtitle="Get help and support"
-              onClick={() => alert('Help center coming soon')}
+              onClick={() => toast('Help center coming soon', { icon: '🚧' })}
             />
             <div className="border-t border-dark-100 dark:border-dark-800" />
             <MenuItem
               icon={<Shield className="w-5 h-5" />}
               title="Privacy Policy"
               subtitle="View our privacy practices"
-              onClick={() => alert('Privacy policy coming soon')}
+              onClick={() => toast('Privacy policy coming soon', { icon: '🚧' })}
             />
             <div className="border-t border-dark-100 dark:border-dark-800" />
             <MenuItem
               icon={<FileText className="w-5 h-5" />}
               title="Terms of Service"
               subtitle="Read our terms and conditions"
-              onClick={() => alert('Terms of service coming soon')}
+              onClick={() => toast('Terms of service coming soon', { icon: '🚧' })}
             />
           </div>
         </motion.div>

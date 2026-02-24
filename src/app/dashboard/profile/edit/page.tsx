@@ -8,6 +8,7 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import {
   User,
   Mail,
@@ -20,7 +21,7 @@ import {
 
 function EditProfileContent() {
   const router = useRouter();
-  const { user, updateProfile, isLoading } = useAuth();
+  const { user, updateProfile, loadUser, isLoading } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -48,13 +49,13 @@ function EditProfileContent() {
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        toast.error('Please select an image file');
         return;
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        toast.error('File size must be less than 5MB');
         return;
       }
 
@@ -69,33 +70,24 @@ function EditProfileContent() {
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('photo', selectedFile);
+      const { authRepository } = await import('@/repositories/auth.repository');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me/photo`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-        body: formData,
-      });
+      // Upload photo
+      await authRepository.uploadProfilePhoto(selectedFile);
 
-      if (!response.ok) {
-        throw new Error('Failed to upload photo');
-      }
+      // Reload user data to get updated profile photo
+      await loadUser();
 
-      alert('Profile photo updated successfully!');
+      toast.success('Profile photo updated successfully!', { icon: '✅' });
 
       // Cleanup
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setSelectedFile(null);
       setPreviewUrl(null);
-
-      // Reload page to show new photo
-      window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to upload photo:', error);
-      alert('Failed to upload photo. Please try again.');
+      const errorMessage = error.response?.data?.error?.message || error.message || 'Failed to upload photo. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }
@@ -110,11 +102,13 @@ function EditProfileContent() {
         fullName: formData.fullName,
         email: formData.email,
       });
-      alert('Profile updated successfully!');
-      router.push('/dashboard/profile');
+      toast.success('Profile updated successfully!', { icon: '✅' });
+      setTimeout(() => {
+        router.push('/dashboard/profile');
+      }, 500);
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('Failed to update profile. Please try again.');
+      toast.error('Failed to update profile. Please try again.');
     } finally {
       setIsSaving(false);
     }

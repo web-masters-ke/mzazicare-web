@@ -7,6 +7,7 @@ import { Button, Spinner } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { useMessaging } from '@/hooks/useMessaging';
 import { Message, MessageType } from '@/types/messaging';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   Image as ImageIcon,
@@ -61,7 +62,7 @@ function MediaGalleryContent() {
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error('Failed to download:', error);
-      alert('Failed to download file');
+      toast.error('Failed to download file');
     }
   };
 
