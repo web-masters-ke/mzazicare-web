@@ -65,7 +65,7 @@ export class ElderlyRepository {
    */
   async updateElderly(id: string, data: Partial<CreateElderlyRequest>): Promise<Elderly> {
     try {
-      const response = await apiClient.put<ApiResponse<Elderly>>(
+      const response = await apiClient.patch<ApiResponse<Elderly>>(
         ApiEndpoints.elderly.update(id),
         data
       );
