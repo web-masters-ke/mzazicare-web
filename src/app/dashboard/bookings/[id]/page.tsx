@@ -101,21 +101,13 @@ function BookingDetailsContent() {
 
     setIsCreatingConversation(true);
     try {
-      const payload = {
+      const conversation = await createConversation({
         participantIds: [otherUserId],
         type: ConversationType.DIRECT,
-      };
-
-      console.log('Creating conversation with payload:', payload);
-      console.log('User role:', userRole);
-      console.log('Other user ID:', otherUserId);
-
-      const conversation = await createConversation(payload);
+      });
 
       router.push(`/dashboard/messages?conversation=${conversation.id}`);
     } catch (error: any) {
-      console.error('Failed to create conversation:', error);
-      console.error('Error response:', error.response?.data);
       alert(error.response?.data?.message || 'Failed to start conversation');
     } finally {
       setIsCreatingConversation(false);

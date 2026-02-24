@@ -62,9 +62,9 @@ export function usePaymentPolling({
         return;
       }
 
-      // Query wallet top-up status by checkoutRequestId
+      // Query by checkoutRequestId
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/wallet/topup/status/${checkoutRequestId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/payments/status/${checkoutRequestId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

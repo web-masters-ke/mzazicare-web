@@ -112,22 +112,22 @@ function MessagesContent() {
 
   // Handle conversation selection
   const handleSelectConversation = (conversationId: string) => {
-    const conversation = (Array.isArray(conversations) ? conversations : []).find((c) => c.id === conversationId);
+    const conversation = conversations.find((c) => c.id === conversationId);
     if (conversation) {
       setCurrentConversation(conversation);
     }
   };
 
   // Filter conversations by search query
-  const filteredConversations = (Array.isArray(conversations) ? conversations : []).filter((conversation) => {
-    if (!conversation.participants || !Array.isArray(conversation.participants)) {
-      return false;
-    }
+  const filteredConversations = conversations.filter((conversation) => {
     const otherParticipant = conversation.participants.find(
       (p) => p.userId !== currentUserId.current
     );
-    const fullName = otherParticipant?.user?.fullName || '';
-    return fullName.toLowerCase().includes(searchQuery.toLowerCase());
+    return (
+      otherParticipant?.user.fullName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) || false
+    );
   });
 
   // Handle send message
@@ -357,11 +357,11 @@ function MessagesContent() {
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {isLoading && (!messages || !messages.length) ? (
+                  {isLoading && !messages.length ? (
                     <div className="flex items-center justify-center h-full">
                       <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
                     </div>
-                  ) : !messages || messages.length === 0 ? (
+                  ) : messages.length === 0 ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
                         <MessageSquare className="w-12 h-12 mx-auto mb-2 text-dark-300" />

@@ -55,21 +55,14 @@ function CaregiverProfileContent() {
 
     setIsCreatingConversation(true);
     try {
-      const payload = {
+      const conversation = await createConversation({
         participantIds: [currentCaregiver.userId],
         type: ConversationType.DIRECT,
-      };
-
-      console.log('Creating conversation with payload:', payload);
-      console.log('Current caregiver:', currentCaregiver);
-
-      const conversation = await createConversation(payload);
+      });
 
       // Navigate to messages page with the conversation selected
       router.push(`/dashboard/messages?conversation=${conversation.id}`);
     } catch (error: any) {
-      console.error('Failed to create conversation:', error);
-      console.error('Error response:', error.response?.data);
       alert(error.response?.data?.message || 'Failed to start conversation');
     } finally {
       setIsCreatingConversation(false);

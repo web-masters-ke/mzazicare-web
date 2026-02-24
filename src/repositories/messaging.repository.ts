@@ -48,17 +48,11 @@ export class MessagingRepository {
    */
   async getConversations(): Promise<Conversation[]> {
     try {
-      const response = await apiClient.get<ApiResponse<any>>(
+      const response = await apiClient.get<ApiResponse<Conversation[]>>(
         ApiEndpoints.messaging.getConversations
       );
 
-      // Handle paginated response
-      const data = this.extractData(response.data);
-      if (data && typeof data === 'object' && 'conversations' in data) {
-        return data.conversations || [];
-      }
-      // Fallback for direct array response
-      return Array.isArray(data) ? data : [];
+      return this.extractData(response.data);
     } catch (error) {
       throw error;
     }
@@ -522,17 +516,6 @@ export class MessagingRepository {
    */
   private extractPaginatedData<T>(response: ApiResponse<PaginatedResponse<T>>): PaginatedResponse<T> {
     if (response.success && response.data) {
-      const data = response.data as any;
-
-      // Handle backend response format: { messages: [...], pagination: {...} }
-      if (data.messages && data.pagination) {
-        return {
-          data: data.messages,
-          pagination: data.pagination,
-        };
-      }
-
-      // Handle standard paginated response: { data: [...], pagination: {...} }
       return response.data;
     }
     throw new Error(response.message || 'Failed to fetch data');

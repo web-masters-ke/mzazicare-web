@@ -146,7 +146,7 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     try {
       const conversation = await messagingRepository.createConversation(data);
       set((state) => ({
-        conversations: [conversation, ...(Array.isArray(state.conversations) ? state.conversations : [])],
+        conversations: [conversation, ...state.conversations],
         currentConversation: conversation,
         isLoading: false,
       }));

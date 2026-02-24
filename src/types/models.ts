@@ -307,7 +307,7 @@ export interface Transaction {
 }
 
 export interface TopUpWalletRequest {
-  phone: string;
+  phoneNumber: string;
   amount: number;
 }
 
@@ -319,7 +319,7 @@ export interface TopUpWalletResponse {
 export interface WithdrawWalletRequest {
   amount: number;
   method: 'MPESA' | 'BANK';
-  phone?: string;
+  phoneNumber?: string;
   bankAccount?: {
     accountNumber: string;
     bankName: string;

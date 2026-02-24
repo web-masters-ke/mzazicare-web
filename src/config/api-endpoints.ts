@@ -158,46 +158,46 @@ export const ApiEndpoints = {
   // Messaging
   messaging: {
     // Conversations
-    createConversation: '/messaging/conversations',
-    getConversations: '/messaging/conversations',
-    getConversationById: (conversationId: string) => `/messaging/conversations/${conversationId}`,
-    updateConversation: (conversationId: string) => `/messaging/conversations/${conversationId}`,
-    deleteConversation: (conversationId: string) => `/messaging/conversations/${conversationId}`,
-    archiveConversation: (conversationId: string) => `/messaging/conversations/${conversationId}/archive`,
-    unarchiveConversation: (conversationId: string) => `/messaging/conversations/${conversationId}/unarchive`,
-    muteConversation: (conversationId: string) => `/messaging/conversations/${conversationId}/mute`,
-    unmuteConversation: (conversationId: string) => `/messaging/conversations/${conversationId}/unmute`,
+    createConversation: '/messages/conversations',
+    getConversations: '/messages/conversations',
+    getConversationById: (conversationId: string) => `/messages/conversations/${conversationId}`,
+    updateConversation: (conversationId: string) => `/messages/conversations/${conversationId}`,
+    deleteConversation: (conversationId: string) => `/messages/conversations/${conversationId}`,
+    archiveConversation: (conversationId: string) => `/messages/conversations/${conversationId}/archive`,
+    unarchiveConversation: (conversationId: string) => `/messages/conversations/${conversationId}/unarchive`,
+    muteConversation: (conversationId: string) => `/messages/conversations/${conversationId}/mute`,
+    unmuteConversation: (conversationId: string) => `/messages/conversations/${conversationId}/unmute`,
 
     // Messages
-    getMessages: (conversationId: string) => `/messaging/conversations/${conversationId}/messages`,
-    sendMessage: (conversationId: string) => `/messaging/conversations/${conversationId}/messages`,
-    markAsRead: (conversationId: string) => `/messaging/conversations/${conversationId}/read`,
-    deleteMessage: (messageId: string) => `/messaging/messages/${messageId}`,
-    editMessage: (messageId: string) => `/messaging/messages/${messageId}`,
-    forwardMessage: (messageId: string) => `/messaging/messages/${messageId}/forward`,
-    getMediaGallery: (conversationId: string) => `/messaging/conversations/${conversationId}/media`,
+    getMessages: (conversationId: string) => `/messages/conversations/${conversationId}/messages`,
+    sendMessage: (conversationId: string) => `/messages/conversations/${conversationId}/messages`,
+    markAsRead: (conversationId: string) => `/messages/conversations/${conversationId}/read`,
+    deleteMessage: (messageId: string) => `/messages/messages/${messageId}`,
+    editMessage: (messageId: string) => `/messages/messages/${messageId}`,
+    forwardMessage: (messageId: string) => `/messages/messages/${messageId}/forward`,
+    getMediaGallery: (conversationId: string) => `/messages/conversations/${conversationId}/media`,
 
     // Reactions
-    addReaction: (messageId: string) => `/messaging/messages/${messageId}/reactions`,
-    removeReaction: (messageId: string, emoji: string) => `/messaging/messages/${messageId}/reactions/${emoji}`,
-    getReactions: (messageId: string) => `/messaging/messages/${messageId}/reactions`,
+    addReaction: (messageId: string) => `/messages/messages/${messageId}/reactions`,
+    removeReaction: (messageId: string, emoji: string) => `/messages/messages/${messageId}/reactions/${emoji}`,
+    getReactions: (messageId: string) => `/messages/messages/${messageId}/reactions`,
 
     // Pinned Messages
-    pinMessage: (conversationId: string) => `/messaging/conversations/${conversationId}/pins`,
-    unpinMessage: (conversationId: string, messageId: string) => `/messaging/conversations/${conversationId}/pins/${messageId}`,
-    getPinnedMessages: (conversationId: string) => `/messaging/conversations/${conversationId}/pins`,
+    pinMessage: (conversationId: string) => `/messages/conversations/${conversationId}/pins`,
+    unpinMessage: (conversationId: string, messageId: string) => `/messages/conversations/${conversationId}/pins/${messageId}`,
+    getPinnedMessages: (conversationId: string) => `/messages/conversations/${conversationId}/pins`,
 
     // Scheduled Messages
-    scheduleMessage: (conversationId: string) => `/messaging/conversations/${conversationId}/scheduled`,
-    getScheduledMessages: (conversationId: string) => `/messaging/conversations/${conversationId}/scheduled`,
-    cancelScheduledMessage: (scheduledMessageId: string) => `/messaging/scheduled/${scheduledMessageId}`,
+    scheduleMessage: (conversationId: string) => `/messages/conversations/${conversationId}/scheduled`,
+    getScheduledMessages: (conversationId: string) => `/messages/conversations/${conversationId}/scheduled`,
+    cancelScheduledMessage: (scheduledMessageId: string) => `/messages/scheduled/${scheduledMessageId}`,
 
     // Participants
-    addParticipant: (conversationId: string) => `/messaging/conversations/${conversationId}/participants`,
-    removeParticipant: (conversationId: string, userId: string) => `/messaging/conversations/${conversationId}/participants/${userId}`,
-    updateParticipantRole: (conversationId: string, userId: string) => `/messaging/conversations/${conversationId}/participants/${userId}/role`,
+    addParticipant: (conversationId: string) => `/messages/conversations/${conversationId}/participants`,
+    removeParticipant: (conversationId: string, userId: string) => `/messages/conversations/${conversationId}/participants/${userId}`,
+    updateParticipantRole: (conversationId: string, userId: string) => `/messages/conversations/${conversationId}/participants/${userId}/role`,
 
     // Typing
-    emitTyping: (conversationId: string) => `/messaging/conversations/${conversationId}/typing`,
+    emitTyping: (conversationId: string) => `/messages/conversations/${conversationId}/typing`,
   },
 } as const;
