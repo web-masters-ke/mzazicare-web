@@ -14,6 +14,7 @@ export interface AuthState {
   // State
   user: User | null;
   isAuthenticated: boolean;
+  isNewUser: boolean; // Track if user just registered
   isLoading: boolean;
   error: string | null;
 
@@ -46,6 +47,7 @@ export const useAuthStore = create<AuthState>()(
         // Initial State
         user: null,
         isAuthenticated: false,
+        isNewUser: false,
         isLoading: false,
         error: null,
 
@@ -83,6 +85,7 @@ export const useAuthStore = create<AuthState>()(
               verificationLoading: false,
               user: response.user,
               isAuthenticated: true,
+              isNewUser: response.isNewUser, // Track if this is a new user
               otpSent: false,
             });
           } catch (error: any) {
@@ -104,6 +107,7 @@ export const useAuthStore = create<AuthState>()(
             set({
               user: null,
               isAuthenticated: false,
+              isNewUser: false,
               error: null,
               otpSent: false,
               otpError: null,

@@ -14,7 +14,7 @@ function VerifyOtpForm() {
   const phoneNumber = searchParams.get('phone') || '';
   const returnUrl = searchParams.get('returnUrl') || '/dashboard';
 
-  const { user, verifyOtp, sendOtp, verificationLoading, verificationError, otpLoading, clearError, isAuthenticated } = useAuth();
+  const { user, isNewUser, verifyOtp, sendOtp, verificationLoading, verificationError, otpLoading, clearError, isAuthenticated } = useAuth();
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -34,16 +34,16 @@ function VerifyOtpForm() {
   // Redirect after successful authentication
   useEffect(() => {
     if (isAuthenticated) {
-      // Check if user has a role set
-      if (!user?.role) {
-        // New user - redirect to role selection
+      // Check if user needs to select a role (new user or no role set)
+      if (isNewUser || !user?.role) {
+        // New user or user without role - redirect to role selection
         router.push('/role-selection');
       } else {
-        // Existing user - redirect to returnUrl
+        // Existing user with role - redirect to returnUrl
         router.push(returnUrl);
       }
     }
-  }, [isAuthenticated, user, returnUrl, router]);
+  }, [isAuthenticated, isNewUser, user, returnUrl, router]);
 
   const handleChange = (index: number, value: string) => {
     // Only allow numbers

@@ -13,6 +13,7 @@ export function useAuth() {
   // Use individual selectors to avoid re-render issues
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isNewUser = useAuthStore((state) => state.isNewUser);
   const isLoading = useAuthStore((state) => state.isLoading);
   const error = useAuthStore((state) => state.error);
   const otpLoading = useAuthStore((state) => state.otpLoading);
@@ -52,6 +53,7 @@ export function useAuth() {
     // State
     user,
     isAuthenticated,
+    isNewUser,
     isLoading,
     error,
     userRole,
