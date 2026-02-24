@@ -12,6 +12,7 @@ export function useCaregiver() {
   const currentCaregiver = useCaregiverStore((state) => state.currentCaregiver);
   const isLoading = useCaregiverStore((state) => state.isLoading);
   const error = useCaregiverStore((state) => state.error);
+  const registerCaregiver = useCaregiverStore((state) => state.registerCaregiver);
   const searchCaregivers = useCaregiverStore((state) => state.searchCaregivers);
   const getCaregiverById = useCaregiverStore((state) => state.getCaregiverById);
   const updateProfile = useCaregiverStore((state) => state.updateProfile);
@@ -26,6 +27,7 @@ export function useCaregiver() {
     error,
 
     // Actions
+    registerCaregiver,
     searchCaregivers,
     getCaregiverById,
     updateProfile,

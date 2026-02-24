@@ -5,353 +5,538 @@ import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useCaregiver } from '@/hooks/useCaregiver';
-import { Button, Badge, Spinner } from '@/components/ui';
-import { motion, AnimatePresence } from 'framer-motion';
-import { UserRole } from '@/types/models';
+import { Button, Spinner } from '@/components/ui';
+import { motion } from 'framer-motion';
+import { UserRole, type CaregiverProfile } from '@/types/models';
 import {
   Search,
-  Filter,
   Star,
-  MapPin,
-  DollarSign,
-  Clock,
-  Award,
-  Heart,
-  User,
   ChevronRight,
   Sparkles,
-  Shield,
+  Award,
   TrendingUp,
-  X,
-  SlidersHorizontal,
   Users,
-  Briefcase,
+  Heart,
+  Shield,
+  Zap,
+  Home,
+  Stethoscope,
+  ShoppingBag,
+  Activity,
+  Grid3x3,
+  List,
+  LayoutGrid,
+  MapPin,
+  Clock,
+  CheckCircle,
+  Crown,
+  Flame,
+  Target,
 } from 'lucide-react';
+
+// View mode type
+type ViewMode = 'mixed' | 'grid' | 'list';
+
+// Category configuration
+const CATEGORIES = [
+  { id: 'HOME_CHECK_IN', label: 'Home Check-In', icon: Home, color: 'blue' },
+  { id: 'COMPANIONSHIP', label: 'Companionship', icon: Heart, color: 'pink' },
+  { id: 'HEALTH_MONITORING', label: 'Health Care', icon: Stethoscope, color: 'green' },
+  { id: 'ERRANDS', label: 'Errands', icon: ShoppingBag, color: 'purple' },
+  { id: 'EMERGENCY_RESPONSE', label: 'Emergency', icon: Zap, color: 'red' },
+  { id: 'CLEANING', label: 'Cleaning', icon: Sparkles, color: 'cyan' },
+];
+
+// Hero Card - Large Featured Card
+function HeroCard({ caregiver }: { caregiver: CaregiverProfile }) {
+  const router = useRouter();
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -4 }}
+      onClick={() => router.push(`/dashboard/caregivers/${caregiver.id}`)}
+      className="relative overflow-hidden bg-gradient-to-br from-primary-500 to-accent-500 rounded-3xl p-8 cursor-pointer group"
+    >
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-1/2 -translate-x-1/2"></div>
+      </div>
+
+      <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
+        {/* Avatar */}
+        <div className="relative flex-shrink-0">
+          {caregiver.user?.profilePhoto ? (
+            <img
+              src={caregiver.user.profilePhoto}
+              alt={caregiver.user.fullName || 'Caregiver'}
+              className="w-24 h-24 rounded-2xl object-cover border-4 border-white/50"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm border-4 border-white/50 flex items-center justify-center text-white text-3xl font-bold">
+              {caregiver.user?.fullName?.charAt(0).toUpperCase() || 'C'}
+            </div>
+          )}
+          <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+            <Crown className="w-5 h-5 text-yellow-900" />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 text-white">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-wide">
+              ⭐ Featured
+            </span>
+          </div>
+          <h3 className="text-2xl font-bold mb-2">
+            {caregiver.user?.fullName || 'Professional Caregiver'}
+          </h3>
+          <p className="text-white/90 mb-4 line-clamp-2">
+            {caregiver.bio || 'Experienced professional caregiver'}
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+              <Star className="w-4 h-4 fill-yellow-300 text-yellow-300" />
+              <span className="font-semibold">{caregiver.rating?.toFixed(1) || 'N/A'}</span>
+            </div>
+            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+              <CheckCircle className="w-4 h-4" />
+              <span className="font-semibold">{caregiver.completedJobs || 0} jobs</span>
+            </div>
+            {caregiver.verificationStatus === 'APPROVED' && (
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                <Shield className="w-4 h-4" />
+                <span className="font-semibold">Verified</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Arrow */}
+        <ChevronRight className="w-8 h-8 text-white opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+      </div>
+    </motion.div>
+  );
+}
+
+// Compact List Item
+function ListItem({ caregiver }: { caregiver: CaregiverProfile }) {
+  const router = useRouter();
+
+  return (
+    <motion.div
+      whileHover={{ x: 4 }}
+      onClick={() => router.push(`/dashboard/caregivers/${caregiver.id}`)}
+      className="flex items-center gap-4 p-4 bg-white dark:bg-dark-900 rounded-xl border border-dark-200 dark:border-dark-800 hover:border-primary-500 dark:hover:border-primary-500 cursor-pointer transition-all hover:shadow-lg"
+    >
+      {/* Avatar */}
+      <div className="relative flex-shrink-0">
+        {caregiver.user?.profilePhoto ? (
+          <img
+            src={caregiver.user.profilePhoto}
+            alt={caregiver.user.fullName || 'Caregiver'}
+            className="w-14 h-14 rounded-xl object-cover"
+          />
+        ) : (
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold">
+            {caregiver.user?.fullName?.charAt(0).toUpperCase() || 'C'}
+          </div>
+        )}
+        {caregiver.verificationStatus === 'APPROVED' && (
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-dark-900 flex items-center justify-center">
+            <Shield className="w-3 h-3 text-white" />
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <h4 className="font-semibold text-dark-900 dark:text-white truncate mb-1">
+          {caregiver.user?.fullName || 'Professional Caregiver'}
+        </h4>
+        <div className="flex items-center gap-3 text-sm">
+          {caregiver.rating && (
+            <div className="flex items-center gap-1 text-dark-600 dark:text-dark-400">
+              <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+              <span className="font-medium">{caregiver.rating.toFixed(1)}</span>
+            </div>
+          )}
+          <span className="text-dark-500 dark:text-dark-500">•</span>
+          <span className="text-dark-600 dark:text-dark-400">{caregiver.completedJobs || 0} jobs</span>
+        </div>
+      </div>
+
+      {/* Skills Badge */}
+      {caregiver.skills && caregiver.skills.length > 0 && (
+        <div className="hidden sm:flex items-center gap-1.5">
+          <span className="px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-lg">
+            {caregiver.skills[0].replace(/_/g, ' ')}
+          </span>
+          {caregiver.skills.length > 1 && (
+            <span className="text-xs text-dark-500 dark:text-dark-400">
+              +{caregiver.skills.length - 1}
+            </span>
+          )}
+        </div>
+      )}
+
+      <ChevronRight className="w-5 h-5 text-dark-400" />
+    </motion.div>
+  );
+}
+
+// Standard Grid Card
+function GridCard({ caregiver }: { caregiver: CaregiverProfile }) {
+  const router = useRouter();
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.03, y: -4 }}
+      onClick={() => router.push(`/dashboard/caregivers/${caregiver.id}`)}
+      className="bg-white dark:bg-dark-900 rounded-2xl border border-dark-200 dark:border-dark-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all cursor-pointer hover:shadow-xl p-5"
+    >
+      {/* Header */}
+      <div className="flex items-start gap-3 mb-4">
+        <div className="relative flex-shrink-0">
+          {caregiver.user?.profilePhoto ? (
+            <img
+              src={caregiver.user.profilePhoto}
+              alt={caregiver.user.fullName || 'Caregiver'}
+              className="w-16 h-16 rounded-xl object-cover"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xl font-bold">
+              {caregiver.user?.fullName?.charAt(0).toUpperCase() || 'C'}
+            </div>
+          )}
+          {caregiver.verificationStatus === 'APPROVED' && (
+            <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white dark:border-dark-900 flex items-center justify-center">
+              <Shield className="w-3.5 h-3.5 text-white" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-dark-900 dark:text-white truncate mb-1">
+            {caregiver.user?.fullName || 'Professional'}
+          </h3>
+          {caregiver.rating && (
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-semibold text-dark-900 dark:text-white">
+                {caregiver.rating.toFixed(1)}
+              </span>
+              {caregiver.totalReviews && (
+                <span className="text-xs text-dark-500 dark:text-dark-400">
+                  ({caregiver.totalReviews})
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bio */}
+      {caregiver.bio && (
+        <p className="text-sm text-dark-600 dark:text-dark-400 mb-4 line-clamp-2">
+          {caregiver.bio}
+        </p>
+      )}
+
+      {/* Skills */}
+      {caregiver.skills && caregiver.skills.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {caregiver.skills.slice(0, 3).map((skill, idx) => (
+            <span
+              key={idx}
+              className="px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-lg"
+            >
+              {skill.replace(/_/g, ' ')}
+            </span>
+          ))}
+          {caregiver.skills.length > 3 && (
+            <span className="px-2.5 py-1 bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-400 text-xs font-semibold rounded-lg">
+              +{caregiver.skills.length - 3}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-4 border-t border-dark-100 dark:border-dark-800">
+        <div className="text-sm">
+          <span className="text-dark-500 dark:text-dark-400">Jobs:</span>
+          <span className="ml-1 font-bold text-dark-900 dark:text-white">
+            {caregiver.completedJobs || 0}
+          </span>
+        </div>
+        <ChevronRight className="w-5 h-5 text-primary-500" />
+      </div>
+    </motion.div>
+  );
+}
+
+// Stats Card
+function StatsCard({ icon: Icon, label, value, color }: any) {
+  return (
+    <div className="bg-white dark:bg-dark-900 rounded-2xl p-5 border border-dark-200 dark:border-dark-800">
+      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-3`}>
+        <Icon className="w-6 h-6 text-white" />
+      </div>
+      <p className="text-3xl font-bold text-dark-900 dark:text-white mb-1">{value}</p>
+      <p className="text-sm text-dark-600 dark:text-dark-400">{label}</p>
+    </div>
+  );
+}
 
 function CaregiversContent() {
   const router = useRouter();
   const { caregivers, isLoading, searchCaregivers } = useCaregiver();
-
   const [searchQuery, setSearchQuery] = useState('');
-  const [minRating, setMinRating] = useState<number>(0);
-  const [maxRate, setMaxRate] = useState<number>(10000);
-  const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('mixed');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     searchCaregivers({});
   }, []);
 
-  const handleSearch = () => {
-    searchCaregivers({
-      minRating: minRating || undefined,
-      maxHourlyRate: maxRate || undefined,
-    });
-  };
-
-  const handleResetFilters = () => {
-    setMinRating(0);
-    setMaxRate(10000);
-    searchCaregivers({});
-  };
-
   const filteredCaregivers = caregivers.filter((caregiver) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
+      caregiver.user?.fullName?.toLowerCase().includes(query) ||
       caregiver.bio?.toLowerCase().includes(query) ||
-      (Array.isArray(caregiver.skills) && caregiver.skills.some((skill) => skill.toLowerCase().includes(query)))
+      caregiver.skills?.some((skill) => skill.toLowerCase().includes(query))
     );
+  }).filter((caregiver) => {
+    if (!selectedCategory) return true;
+    return caregiver.skills?.includes(selectedCategory);
   });
 
+  // Top performers
+  const topRated = [...filteredCaregivers]
+    .filter(c => c.rating && c.rating >= 4.5)
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    .slice(0, 3);
+
+  const mostExperienced = [...filteredCaregivers]
+    .sort((a, b) => (b.completedJobs || 0) - (a.completedJobs || 0))
+    .slice(0, 5);
+
+  const verified = filteredCaregivers.filter(c => c.verificationStatus === 'APPROVED');
+
+  // Stats
+  const stats = [
+    { icon: Users, label: 'Total Caregivers', value: filteredCaregivers.length, color: 'from-blue-500 to-cyan-500' },
+    { icon: Shield, label: 'Verified', value: verified.length, color: 'from-green-500 to-emerald-500' },
+    { icon: Star, label: 'Top Rated', value: topRated.length, color: 'from-yellow-500 to-orange-500' },
+    { icon: Flame, label: 'Most Active', value: mostExperienced.length, color: 'from-red-500 to-pink-500' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-primary-50/20 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950">
-      <div className="pb-24 pt-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-950">
+      <div className="pb-24 pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <div className="flex items-center gap-4 mb-3">
-            <div className="w-14 h-14 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-              <Users className="w-7 h-7 text-white" />
-            </div>
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-dark-900 to-dark-700 dark:from-white dark:to-dark-300 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-dark-900 dark:text-white mb-1">
                 Find Caregivers
               </h1>
-              <p className="text-dark-600 dark:text-dark-400 flex items-center gap-2 mt-1">
-                <Sparkles className="w-4 h-4 text-primary-500" />
-                {filteredCaregivers.length} verified professionals ready to help
+              <p className="text-sm text-dark-600 dark:text-dark-400">
+                Discover trusted professionals
               </p>
             </div>
-          </div>
-        </motion.div>
-
-        {/* Search and Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8 space-y-4"
-        >
-          <div className="flex gap-4">
-            {/* Search Bar */}
-            <div className="flex-1 relative group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400 group-focus-within:text-primary-500 transition-colors" />
-              <input
-                type="text"
-                placeholder="Search by skills, experience, specialization..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white dark:bg-dark-900 border-2 border-dark-100 dark:border-dark-800 text-dark-900 dark:text-white placeholder:text-dark-400 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all shadow-lg shadow-dark-900/5 dark:shadow-black/20"
-              />
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-6 py-4 rounded-2xl border-2 flex items-center gap-3 font-semibold transition-all shadow-lg ${
-                showFilters
-                  ? 'bg-gradient-to-r from-primary-500 to-accent-500 border-primary-500 text-white shadow-primary-500/30'
-                  : 'bg-white dark:bg-dark-900 border-dark-100 dark:border-dark-800 text-dark-900 dark:text-white hover:border-primary-500 shadow-dark-900/5 dark:shadow-black/20'
-              }`}
-            >
-              <SlidersHorizontal className="w-5 h-5" />
-              <span className="hidden sm:inline">Filters</span>
-            </motion.button>
-          </div>
-
-          {/* Advanced Filters */}
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ opacity: 0, height: 0, y: -10 }}
-                animate={{ opacity: 1, height: 'auto', y: 0 }}
-                exit={{ opacity: 0, height: 0, y: -10 }}
-                className="bg-white dark:bg-dark-900 rounded-2xl p-6 border-2 border-dark-100 dark:border-dark-800 shadow-xl overflow-hidden"
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-2 bg-white dark:bg-dark-900 rounded-xl p-1 border border-dark-200 dark:border-dark-800">
+              <button
+                onClick={() => setViewMode('mixed')}
+                className={`p-2 rounded-lg transition-all ${
+                  viewMode === 'mixed'
+                    ? 'bg-primary-500 text-white'
+                    : 'text-dark-600 dark:text-dark-400 hover:bg-dark-100 dark:hover:bg-dark-800'
+                }`}
               >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-primary-900/20 dark:to-accent-900/20 rounded-xl flex items-center justify-center">
-                      <Filter className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-                    </div>
-                    <h3 className="text-lg font-bold text-dark-900 dark:text-white">Advanced Filters</h3>
-                  </div>
-                  <button
-                    onClick={handleResetFilters}
-                    className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold flex items-center gap-1"
-                  >
-                    <X className="w-4 h-4" />
-                    Reset
-                  </button>
-                </div>
+                <LayoutGrid className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-primary-500 text-white'
+                    : 'text-dark-600 dark:text-dark-400 hover:bg-dark-100 dark:hover:bg-dark-800'
+                }`}
+              >
+                <Grid3x3 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-all ${
+                  viewMode === 'list'
+                    ? 'bg-primary-500 text-white'
+                    : 'text-dark-600 dark:text-dark-400 hover:bg-dark-100 dark:hover:bg-dark-800'
+                }`}
+              >
+                <List className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-dark-900 dark:text-white mb-3 flex items-center gap-2">
-                      <Star className="w-4 h-4 text-yellow-500" />
-                      Minimum Rating
-                    </label>
-                    <select
-                      value={minRating}
-                      onChange={(e) => setMinRating(Number(e.target.value))}
-                      className="w-full px-4 py-3.5 rounded-xl border-2 border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    >
-                      <option value="0">Any Rating</option>
-                      <option value="3">3+ Stars</option>
-                      <option value="4">4+ Stars</option>
-                      <option value="4.5">4.5+ Stars</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-dark-900 dark:text-white mb-3 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-green-500" />
-                      Max Hourly Rate (KES)
-                    </label>
-                    <input
-                      type="number"
-                      value={maxRate}
-                      onChange={(e) => setMaxRate(Number(e.target.value))}
-                      className="w-full px-4 py-3.5 rounded-xl border-2 border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                      placeholder="Enter max rate"
-                    />
-                  </div>
-                  <div className="flex items-end">
-                    <Button
-                      variant="primary"
-                      onClick={handleSearch}
-                      className="w-full bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 shadow-lg shadow-primary-500/30"
-                    >
-                      Apply Filters
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Search */}
+          <div className="relative mb-4">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+            <input
+              type="text"
+              placeholder="Search caregivers, skills, specializations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white dark:bg-dark-900 border border-dark-200 dark:border-dark-800 text-dark-900 dark:text-white placeholder:text-dark-400 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+            />
+          </div>
+
+          {/* Category Pills */}
+          <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+            <div className="flex gap-2 pb-2">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                  selectedCategory === null
+                    ? 'bg-dark-900 dark:bg-white text-white dark:text-dark-900'
+                    : 'bg-white dark:bg-dark-900 text-dark-900 dark:text-white border border-dark-200 dark:border-dark-800'
+                }`}
+              >
+                All
+              </button>
+              {CATEGORIES.map((category) => {
+                const Icon = category.icon;
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 ${
+                      selectedCategory === category.id
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-white dark:bg-dark-900 text-dark-900 dark:text-white border border-dark-200 dark:border-dark-800'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {category.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </motion.div>
 
-        {/* Caregivers Grid */}
+        {/* Content */}
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="text-center">
-              <Spinner size="lg" />
-              <p className="text-dark-600 dark:text-dark-400 mt-4">Loading caregivers...</p>
-            </div>
+            <Spinner size="lg" />
           </div>
         ) : filteredCaregivers.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-dark-900 rounded-3xl p-12 text-center border-2 border-dashed border-dark-200 dark:border-dark-800 shadow-xl"
-          >
-            <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center">
-              <User className="w-12 h-12 text-blue-500" />
-            </div>
-            <h3 className="text-2xl font-bold text-dark-900 dark:text-white mb-2">
-              No caregivers found
-            </h3>
-            <p className="text-dark-600 dark:text-dark-400 mb-6 max-w-md mx-auto">
-              Try adjusting your search criteria or filters to find the perfect caregiver
-            </p>
-            <Button variant="primary" onClick={handleResetFilters}>
-              Reset Filters
-            </Button>
-          </motion.div>
+          <div className="bg-white dark:bg-dark-900 rounded-2xl p-12 text-center border border-dark-200 dark:border-dark-800">
+            <Users className="w-16 h-16 mx-auto mb-4 text-dark-400" />
+            <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-2">No caregivers found</h3>
+            <p className="text-sm text-dark-600 dark:text-dark-400">Try adjusting your search</p>
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {filteredCaregivers.map((caregiver, index) => (
+            {viewMode === 'mixed' && (
+              <>
+                {/* Stats Grid */}
                 <motion.div
-                  key={caregiver.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -4 }}
-                  onClick={() => router.push(`/dashboard/caregivers/${caregiver.id}`)}
-                  className="group bg-white dark:bg-dark-900 rounded-3xl p-6 border-2 border-dark-100 dark:border-dark-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-primary-500/10"
+                  className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
                 >
-                  <div className="flex gap-5">
-                    {/* Avatar */}
-                    <div className="flex-shrink-0">
-                      <div className="relative">
-                        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform">
-                          <User className="w-12 h-12" />
-                        </div>
-                        {caregiver.documentsVerified && (
-                          <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white dark:border-dark-900 flex items-center justify-center shadow-lg">
-                            <Shield className="w-4 h-4 text-white" />
-                          </div>
-                        )}
-                      </div>
+                  {stats.map((stat, idx) => (
+                    <StatsCard key={idx} {...stat} />
+                  ))}
+                </motion.div>
+
+                {/* Hero Featured */}
+                {topRated.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
+                  >
+                    <HeroCard caregiver={topRated[0]} />
+                  </motion.div>
+                )}
+
+                {/* Top Rated Grid */}
+                {topRated.length > 1 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
+                  >
+                    <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
+                      <Star className="w-6 h-6 text-yellow-500" />
+                      Top Rated
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {topRated.slice(1, 3).map((caregiver) => (
+                        <GridCard key={caregiver.id} caregiver={caregiver} />
+                      ))}
                     </div>
+                  </motion.div>
+                )}
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-dark-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-1">
-                            Professional Caregiver
-                          </h3>
-                          {caregiver.experience && (
-                            <p className="text-sm text-dark-600 dark:text-dark-400 flex items-center gap-1.5">
-                              <Briefcase className="w-3.5 h-3.5" />
-                              {caregiver.experience}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Rating & Stats */}
-                      <div className="flex items-center gap-3 mb-4">
-                        {caregiver.rating && (
-                          <div className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 px-3 py-1.5 rounded-xl border border-yellow-200 dark:border-yellow-800">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-bold text-dark-900 dark:text-white">
-                              {caregiver.rating.toFixed(1)}
-                            </span>
-                            {caregiver.totalReviews && (
-                              <span className="text-xs text-dark-600 dark:text-dark-400">
-                                ({caregiver.totalReviews})
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {caregiver.documentsVerified && (
-                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 flex items-center gap-1.5 px-3 py-1.5">
-                            <Award className="w-3.5 h-3.5" />
-                            Verified
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Bio */}
-                      {caregiver.bio && (
-                        <p className="text-sm text-dark-700 dark:text-dark-300 mb-4 line-clamp-2 leading-relaxed">
-                          {caregiver.bio}
-                        </p>
-                      )}
-
-                      {/* Skills */}
-                      {Array.isArray(caregiver.skills) && caregiver.skills.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {caregiver.skills.slice(0, 4).map((skill, idx) => (
-                            <span
-                              key={idx}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-primary-50 to-accent-50 text-primary-700 dark:from-primary-900/20 dark:to-accent-900/20 dark:text-primary-400 border border-primary-200 dark:border-primary-800"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                          {caregiver.skills.length > 4 && (
-                            <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-dark-100 text-dark-700 dark:bg-dark-800 dark:text-dark-300 border border-dark-200 dark:border-dark-700">
-                              +{caregiver.skills.length - 4}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Details Footer */}
-                      <div className="flex items-center justify-between pt-4 border-t border-dark-100 dark:border-dark-800">
-                        {caregiver.hourlyRate && (
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg flex items-center justify-center">
-                              <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
-                            </div>
-                            <div>
-                              <p className="text-xs text-dark-600 dark:text-dark-400">Hourly Rate</p>
-                              <p className="text-sm font-bold text-dark-900 dark:text-white">
-                                KES {caregiver.hourlyRate}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 font-semibold group-hover:gap-3 transition-all">
-                          <span className="text-sm">View Profile</span>
-                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      </div>
+                {/* Most Experienced List */}
+                {mostExperienced.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
+                  >
+                    <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4 flex items-center gap-2">
+                      <Target className="w-6 h-6 text-blue-500" />
+                      Most Experienced
+                    </h2>
+                    <div className="space-y-3">
+                      {mostExperienced.map((caregiver) => (
+                        <ListItem key={caregiver.id} caregiver={caregiver} />
+                      ))}
                     </div>
+                  </motion.div>
+                )}
+
+                {/* All Others Grid */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <h2 className="text-xl font-bold text-dark-900 dark:text-white mb-4">All Caregivers</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredCaregivers.map((caregiver) => (
+                      <GridCard key={caregiver.id} caregiver={caregiver} />
+                    ))}
                   </div>
                 </motion.div>
-              ))}
-            </div>
+              </>
+            )}
 
-            {/* Results Summary */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mt-8 text-center"
-            >
-              <div className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-dark-900 rounded-full border border-dark-200 dark:border-dark-800 shadow-lg">
-                <TrendingUp className="w-4 h-4 text-primary-500" />
-                <span className="text-sm font-semibold text-dark-700 dark:text-dark-300">
-                  Showing {filteredCaregivers.length} caregiver{filteredCaregivers.length !== 1 ? 's' : ''}
-                </span>
+            {viewMode === 'grid' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredCaregivers.map((caregiver) => (
+                  <GridCard key={caregiver.id} caregiver={caregiver} />
+                ))}
               </div>
-            </motion.div>
+            )}
+
+            {viewMode === 'list' && (
+              <div className="space-y-3">
+                {filteredCaregivers.map((caregiver) => (
+                  <ListItem key={caregiver.id} caregiver={caregiver} />
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

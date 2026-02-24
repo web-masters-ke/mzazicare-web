@@ -16,6 +16,7 @@ export interface CaregiverState {
   error: string | null;
 
   // Actions
+  registerCaregiver: (data?: { bio?: string; skills?: string[] }) => Promise<CaregiverProfile>;
   searchCaregivers: (filters: CaregiverSearchFilters) => Promise<void>;
   getCaregiverById: (id: string) => Promise<void>;
   updateProfile: (data: Partial<CaregiverProfile>) => Promise<CaregiverProfile>;
@@ -31,6 +32,22 @@ export const useCaregiverStore = create<CaregiverState>()(
       currentCaregiver: null,
       isLoading: false,
       error: null,
+
+      // Register as caregiver
+      registerCaregiver: async (data?: { bio?: string; skills?: string[] }) => {
+        set({ isLoading: true, error: null });
+        try {
+          const profile = await caregiverRepository.registerCaregiver(data);
+          set({ currentCaregiver: profile, isLoading: false });
+          return profile;
+        } catch (error: any) {
+          set({
+            isLoading: false,
+            error: error.message || 'Failed to register as caregiver',
+          });
+          throw error;
+        }
+      },
 
       // Search caregivers
       searchCaregivers: async (filters: CaregiverSearchFilters) => {

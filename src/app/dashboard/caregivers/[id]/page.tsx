@@ -9,9 +9,11 @@ import { useElderly } from '@/hooks/useElderly';
 import { useBookings } from '@/hooks/useBookings';
 import { useMessaging } from '@/hooks/useMessaging';
 import { useServices } from '@/hooks/useServices';
+import { useWalletStore } from '@/stores/wallet.store';
 import { Button, Badge, Spinner } from '@/components/ui';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserRole, DocumentStatus, ServiceCategory, ConversationType } from '@/types/models';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   User,
@@ -32,6 +34,8 @@ import {
   TrendingUp,
   Users,
   Sparkles,
+  Wallet,
+  AlertCircle,
 } from 'lucide-react';
 
 function CaregiverProfileContent() {
@@ -42,7 +46,8 @@ function CaregiverProfileContent() {
   const { elderlyList, fetchElderlyList } = useElderly();
   const { createBooking, isLoading: isCreatingBooking } = useBookings();
   const { createConversation } = useMessaging();
-  const { services, fetchServices, getServiceByCategory } = useServices();
+  const { services, fetchServices, getServiceByCategory, isLoading: servicesLoading } = useServices();
+  const { wallet, fetchWallet, isLoading: walletLoading } = useWalletStore();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedElderly, setSelectedElderly] = useState('');
   const [bookingDate, setBookingDate] = useState('');
@@ -57,6 +62,7 @@ function CaregiverProfileContent() {
       getCaregiverById(caregiverId);
       fetchElderlyList();
       fetchServices();
+      fetchWallet(); // Fetch wallet balance
     }
   }, [caregiverId]);
 
@@ -72,28 +78,56 @@ function CaregiverProfileContent() {
 
       router.push(`/dashboard/messages?conversation=${conversation.id}`);
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to start conversation');
+      toast.error(error.response?.data?.message || 'Failed to start conversation');
     } finally {
       setIsCreatingConversation(false);
     }
   };
 
+  const calculateBookingCost = () => {
+    const service = getServiceByCategory(serviceType);
+    if (!service) return 0;
+
+    const hours = Number(bookingDuration) / 60;
+    const baseAmount = Number(service.basePrice);
+    const hourlyAmount = Number(service.pricePerHour) * hours;
+    return baseAmount + hourlyAmount;
+  };
+
   const handleBooking = async () => {
     if (!selectedElderly || !bookingDate || !bookingTime || !bookingDuration) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
     try {
       const selectedElderlyProfile = elderlyList.find(e => e.id === selectedElderly);
       if (!selectedElderlyProfile) {
-        alert('Selected elderly profile not found');
+        toast.error('Selected elderly profile not found');
+        return;
+      }
+
+      // Ensure services are loaded
+      if (!Array.isArray(services) || services.length === 0) {
+        toast.error('Service types are still loading. Please try again in a moment.');
         return;
       }
 
       const service = getServiceByCategory(serviceType);
       if (!service) {
-        alert('Service type not found. Please try again.');
+        toast.error('Service type not found. Please try again.');
+        return;
+      }
+
+      // Check wallet balance
+      const bookingCost = calculateBookingCost();
+      const walletBalance = Number(wallet?.balance || 0);
+
+      if (walletBalance < bookingCost) {
+        toast.error(
+          `Insufficient balance: KES ${(bookingCost - walletBalance).toLocaleString()} needed. Please top up your wallet.`,
+          { duration: 5000 }
+        );
         return;
       }
 
@@ -112,7 +146,9 @@ function CaregiverProfileContent() {
         escrowReleaseMode: 'AUTO_RELEASE',
       });
 
-      alert('Booking created successfully! Redirecting to bookings...');
+      toast.success('Booking created and paid successfully!', {
+        icon: '✅',
+      });
       setShowBookingModal(false);
 
       setSelectedElderly('');
@@ -122,10 +158,15 @@ function CaregiverProfileContent() {
       setServiceType(ServiceCategory.COMPANIONSHIP);
       setBookingNotes('');
 
-      router.push('/dashboard/bookings');
+      // Refresh wallet balance
+      fetchWallet();
+
+      setTimeout(() => {
+        router.push('/dashboard/bookings');
+      }, 500);
     } catch (error: any) {
       console.error('Failed to create booking:', error);
-      alert(error.response?.data?.message || error.message || 'Failed to create booking. Please try again.');
+      toast.error(error.response?.data?.message || error.message || 'Failed to create booking. Please try again.');
     }
   };
 
@@ -550,6 +591,55 @@ function CaregiverProfileContent() {
                   />
                 </div>
 
+                {/* Wallet Balance */}
+                {wallet && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`p-5 rounded-2xl border-2 ${
+                      Number(wallet.balance) >= calculateBookingCost()
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                        : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Wallet className={`w-5 h-5 ${
+                          Number(wallet.balance) >= calculateBookingCost()
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-orange-600 dark:text-orange-400'
+                        }`} />
+                        <span className="text-sm font-semibold text-dark-700 dark:text-dark-300">
+                          Wallet Balance
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => router.push('/dashboard/wallet')}
+                        className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
+                      >
+                        Top Up
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-dark-900 dark:text-white">
+                        KES {Number(wallet.balance).toLocaleString()}
+                      </span>
+                      {Number(wallet.balance) < calculateBookingCost() && (
+                        <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400">
+                          <AlertCircle className="w-4 h-4" />
+                          <span className="text-xs font-semibold">Insufficient</span>
+                        </div>
+                      )}
+                      {Number(wallet.balance) >= calculateBookingCost() && (
+                        <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                          <CheckCircle className="w-4 h-4" />
+                          <span className="text-xs font-semibold">Sufficient</span>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Total Cost */}
                 {caregiver.hourlyRate && bookingDuration && (
                   <motion.div
@@ -588,11 +678,11 @@ function CaregiverProfileContent() {
                   <Button
                     variant="primary"
                     onClick={handleBooking}
-                    disabled={isCreatingBooking}
+                    disabled={isCreatingBooking || servicesLoading}
                     leftIcon={<Calendar className="w-5 h-5" />}
                     className="flex-1 bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 shadow-lg shadow-primary-500/30"
                   >
-                    {isCreatingBooking ? 'Creating...' : 'Confirm Booking'}
+                    {isCreatingBooking ? 'Creating...' : servicesLoading ? 'Loading...' : 'Confirm Booking'}
                   </Button>
                 </div>
               </div>

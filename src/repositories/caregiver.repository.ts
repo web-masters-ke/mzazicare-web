@@ -24,6 +24,22 @@ export interface CaregiverSearchFilters {
 
 export class CaregiverRepository {
   /**
+   * Register as caregiver (create caregiver profile)
+   */
+  async registerCaregiver(data?: { bio?: string; skills?: string[] }): Promise<CaregiverProfile> {
+    try {
+      const response = await apiClient.post<ApiResponse<CaregiverProfile>>(
+        ApiEndpoints.caregiver.register,
+        data || {}
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Get caregiver profile
    */
   async getCaregiverProfile(): Promise<CaregiverProfile> {
@@ -55,9 +71,44 @@ export class CaregiverRepository {
   }
 
   /**
-   * Submit caregiver documents
+   * Upload caregiver documents (files)
    */
-  async submitDocuments(documents: any): Promise<any> {
+  async uploadDocuments(files: {
+    nationalIdFront: File;
+    nationalIdBack: File;
+    selfieWithId: File;
+  }): Promise<{ nationalIdFront: string; nationalIdBack: string; selfieWithId: string; }> {
+    try {
+      const formData = new FormData();
+      formData.append('nationalIdFront', files.nationalIdFront);
+      formData.append('nationalIdBack', files.nationalIdBack);
+      formData.append('selfieWithId', files.selfieWithId);
+
+      const response = await apiClient.post<ApiResponse<any>>(
+        ApiEndpoints.caregiver.uploadDocuments,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Submit caregiver documents (URLs)
+   */
+  async submitDocuments(documents: {
+    nationalIdNumber: string;
+    nationalIdFront: string;
+    nationalIdBack: string;
+    selfieWithId: string;
+  }): Promise<any> {
     try {
       const response = await apiClient.post<ApiResponse<any>>(
         ApiEndpoints.caregiver.submitDocuments,
@@ -113,8 +164,25 @@ export class CaregiverRepository {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
-      const response = await apiClient.get<ApiResponse<any>>(
-        `${ApiEndpoints.caregiver.earnings}?${params.toString()}`
+      const url = params.toString()
+        ? `${ApiEndpoints.caregiver.earnings}?${params.toString()}`
+        : ApiEndpoints.caregiver.earnings;
+
+      const response = await apiClient.get<ApiResponse<any>>(url);
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get my caregiver profile
+   */
+  async getMyProfile(): Promise<CaregiverProfile> {
+    try {
+      const response = await apiClient.get<ApiResponse<CaregiverProfile>>(
+        ApiEndpoints.caregiver.myProfile
       );
 
       return this.extractData(response.data);
