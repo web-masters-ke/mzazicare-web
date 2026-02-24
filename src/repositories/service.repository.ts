@@ -13,12 +13,12 @@ export class ServiceRepository {
    */
   async getAllServices(): Promise<ServiceType[]> {
     try {
-      const response = await apiClient.get<ServiceType[]>(
+      const response = await apiClient.get<ApiResponse<ServiceType[]>>(
         ApiEndpoints.services.list
       );
 
-      // The services endpoint returns an array directly, not wrapped
-      return response.data;
+      // Extract data from ApiResponse wrapper
+      return this.extractListData(response.data);
     } catch (error) {
       throw error;
     }
@@ -29,14 +29,37 @@ export class ServiceRepository {
    */
   async getServiceById(id: string): Promise<ServiceType> {
     try {
-      const response = await apiClient.get<ServiceType>(
+      const response = await apiClient.get<ApiResponse<ServiceType>>(
         ApiEndpoints.services.byId(id)
       );
 
-      return response.data;
+      return this.extractData(response.data);
     } catch (error) {
       throw error;
     }
+  }
+
+  /**
+   * Extract data from API response
+   */
+  private extractData<T>(response: ApiResponse<T>): T {
+    if (response.data !== undefined) {
+      return response.data;
+    }
+    return response as unknown as T;
+  }
+
+  /**
+   * Extract list data from API response
+   */
+  private extractListData<T>(response: ApiResponse<T[]>): T[] {
+    if (response.data !== undefined) {
+      return response.data;
+    }
+    if (Array.isArray(response)) {
+      return response;
+    }
+    return response as unknown as T[];
   }
 
   /**

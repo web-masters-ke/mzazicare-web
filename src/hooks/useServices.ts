@@ -26,10 +26,18 @@ export function useServices(autoLoad: boolean = false) {
   };
 
   const getServiceByCategory = (category: ServiceCategory): ServiceType | undefined => {
+    if (!Array.isArray(services)) {
+      console.warn('Services is not an array:', services);
+      return undefined;
+    }
     return services.find(s => s.category === category);
   };
 
   const getServiceById = (id: string): ServiceType | undefined => {
+    if (!Array.isArray(services)) {
+      console.warn('Services is not an array:', services);
+      return undefined;
+    }
     return services.find(s => s.id === id);
   };
 

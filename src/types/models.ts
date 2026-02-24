@@ -56,6 +56,11 @@ export interface FamilyUser extends User {
 export interface CaregiverProfile {
   id: string;
   userId: string;
+  user?: {
+    id: string;
+    fullName?: string;
+    profilePhoto?: string;
+  };
   bio?: string;
   experience?: string;
   certifications?: string[];
@@ -64,10 +69,12 @@ export interface CaregiverProfile {
   availability?: CaregiverAvailability[];
   rating?: number;
   totalReviews?: number;
-  documentsVerified: boolean;
-  backgroundCheckStatus: DocumentStatus;
-  createdAt: string;
-  updatedAt: string;
+  completedJobs?: number;
+  documentsVerified?: boolean;
+  verificationStatus?: 'PENDING' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED';
+  backgroundCheckStatus?: DocumentStatus;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CaregiverAvailability {
@@ -173,39 +180,87 @@ export interface CreateElderlyRequest {
 
 export interface Booking {
   id: string;
-  familyUserId: string;
+  bookingNumber?: string;
+  userId: string;
+  familyUserId?: string;
   elderlyId: string;
   caregiverId?: string;
-  serviceType: ServiceCategory;
+  serviceTypeId: string;
+  serviceType?: {
+    id: string;
+    category: ServiceCategory;
+    name: string;
+    description: string;
+    icon?: string;
+    basePrice: string | number;
+    pricePerHour: string | number;
+    minDuration: number;
+    maxDuration: number;
+    isActive?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+  };
   status: BookingStatus;
-  scheduledStartTime: string;
-  scheduledEndTime: string;
-  durationMinutes: number;
+  scheduledDate: string;
+  scheduledTime: string;
+  scheduledStartTime?: string; // Legacy, for backward compatibility
+  scheduledEndTime?: string; // Legacy, for backward compatibility
+  duration: number;
+  durationMinutes?: number; // Legacy, for backward compatibility
+  address: string;
+  latitude?: number;
+  longitude?: number;
+  notes?: string;
+  isRecurring?: boolean;
+  recurringPattern?: string | null;
+  autoMatch?: boolean;
+  totalAmount?: string | number;
+  platformFee?: string | number;
+  caregiverAmount?: string | number;
   hourlyRate?: number;
-  totalAmount?: number;
-  paymentStatus: PaymentStatus;
+  paymentStatus?: PaymentStatus;
+  payment?: {
+    id: string;
+    amount: number;
+    status: string;
+    method?: string;
+    transactionId?: string;
+  };
+  escrowReleaseMode?: 'AUTO_RELEASE' | 'FAMILY_APPROVAL';
+  confirmedAt?: string | null;
+  cancelledAt?: string | null;
+  cancelledBy?: string | null;
+  cancellationReason?: string | null;
   specialInstructions?: string;
-  cancellationReason?: string;
   elderly?: BookingElderlyInfo;
   caregiver?: BookingCaregiverInfo;
-  visit?: BookingVisitInfo;
+  visit?: BookingVisitInfo | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface BookingElderlyInfo {
   id: string;
-  firstName: string;
-  lastName: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  photo?: string;
   photoUrl?: string;
 }
 
 export interface BookingCaregiverInfo {
   id: string;
-  firstName: string;
-  lastName: string;
+  userId?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  photo?: string;
   photoUrl?: string;
   rating?: number;
+  user?: {
+    fullName?: string;
+    profilePhoto?: string;
+  };
 }
 
 export interface BookingVisitInfo {
@@ -328,7 +383,7 @@ export interface Transaction {
 }
 
 export interface TopUpWalletRequest {
-  phoneNumber: string;
+  phone: string;
   amount: number;
 }
 
