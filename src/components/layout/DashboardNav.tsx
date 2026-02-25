@@ -44,8 +44,8 @@ export function DashboardNav() {
   ];
 
   const caregiverNavItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'My Bookings', href: '/dashboard/bookings', icon: Calendar },
+    { name: 'Dashboard', href: '/dashboard/caregiver', icon: Home },
+    { name: 'My Jobs', href: '/dashboard/jobs', icon: Calendar },
     { name: 'Earnings', href: '/dashboard/earnings', icon: Wallet },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   ];
@@ -59,7 +59,7 @@ export function DashboardNav() {
           {/* Logo and Desktop Navigation */}
           <div className="flex">
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center">
+            <Link href={userRole === UserRole.CAREGIVER ? '/dashboard/caregiver' : '/dashboard'} className="flex items-center">
               <h1 className="text-xl font-bold text-dark-900 dark:text-white">
                 Mzazi<span className="text-primary-500">Care</span>
               </h1>

@@ -7,8 +7,12 @@ import { DashboardNav } from '@/components/layout/DashboardNav';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button, Spinner } from '@/components/ui';
+import { CaregiverCalendar } from '@/components/ui/CaregiverCalendar';
 import { motion } from 'framer-motion';
 import { UserRole } from '@/types/models';
+import { EnvConfig } from '@/config/env.config';
+import { ApiEndpoints } from '@/config/api-endpoints';
+import { storageService } from '@/services/storage/storage.service';
 import {
   Calendar,
   DollarSign,
@@ -36,9 +40,12 @@ function CaregiverDashboardContent() {
     rating: 0,
     totalReviews: 0,
   });
+  const [availability, setAvailability] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
 
   useEffect(() => {
     loadCaregiverStats();
+    loadAvailabilityAndBookings();
   }, []);
 
   const loadCaregiverStats = async () => {
@@ -57,6 +64,45 @@ function CaregiverDashboardContent() {
       console.error('Failed to load caregiver stats:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadAvailabilityAndBookings = async () => {
+    try {
+      const accessToken = await storageService.getAccessToken();
+
+      if (!accessToken) {
+        console.error('No access token found');
+        return;
+      }
+
+      // Fetch caregiver profile (includes availability)
+      const profileUrl = `${EnvConfig.baseUrl}${ApiEndpoints.caregiver.myProfile}`;
+      const profileResponse = await fetch(profileUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        setAvailability(profileData.data?.availability || []);
+      }
+
+      // Fetch bookings
+      const bookingsUrl = `${EnvConfig.baseUrl}${ApiEndpoints.booking.family.list}?caregiverId=me`;
+      const bookingsResponse = await fetch(bookingsUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (bookingsResponse.ok) {
+        const bookingsData = await bookingsResponse.json();
+        setBookings(bookingsData.data?.bookings || bookingsData.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to load availability and bookings:', error);
     }
   };
 
@@ -213,13 +259,50 @@ function CaregiverDashboardContent() {
               View earnings and withdraw funds
             </p>
           </motion.button>
+
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.7 }}
+            onClick={() => router.push('/dashboard/caregiver/settings')}
+            className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-2xl p-6 border border-green-200 dark:border-green-800 hover:border-green-500 dark:hover:border-green-500 transition-all group text-left"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-xl flex items-center justify-center group-hover:bg-green-500 transition-colors">
+                <Briefcase className="w-6 h-6 text-green-600 dark:text-green-400 group-hover:text-white" />
+              </div>
+              <ArrowRight className="w-5 h-5 text-dark-400 group-hover:text-green-500 transition-colors" />
+            </div>
+            <h3 className="text-lg font-semibold text-dark-900 dark:text-white mb-1">
+              Professional Settings
+            </h3>
+            <p className="text-sm text-dark-600 dark:text-dark-400">
+              Set your rates, services & availability
+            </p>
+          </motion.button>
         </div>
+
+        {/* Calendar */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="bg-dark-50 dark:bg-dark-900 rounded-2xl p-6 border border-dark-100 dark:border-dark-800 mb-6"
+        >
+          <CaregiverCalendar
+            availability={availability}
+            bookings={bookings}
+            onDateClick={(date) => {
+              console.log('Date clicked:', date);
+            }}
+          />
+        </motion.div>
 
         {/* Profile Status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.8 }}
           className="bg-dark-50 dark:bg-dark-900 rounded-2xl p-6 border border-dark-100 dark:border-dark-800 mb-6"
         >
           <div className="flex items-center justify-between mb-4">

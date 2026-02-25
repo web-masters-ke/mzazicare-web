@@ -151,7 +151,7 @@ export class BookingRepository {
 
   /**
    * Get bookings for caregiver
-   * Uses specific endpoints based on status
+   * Uses the standard bookings endpoint which now handles caregivers
    */
   async getCaregiverBookings(
     status?: BookingStatus,
@@ -162,69 +162,12 @@ export class BookingRepository {
       const params = new URLSearchParams();
       params.append('page', page.toString());
       params.append('limit', limit.toString());
-
-      // If no status specified, fetch all bookings from all endpoints
-      if (!status) {
-        // Fetch from all endpoints and combine
-        const [pendingRes, upcomingRes, historyRes] = await Promise.allSettled([
-          apiClient.get<ApiResponse<PaginatedResponse<Booking>>>(
-            `${ApiEndpoints.booking.caregiver.pending}?${params.toString()}`
-          ),
-          apiClient.get<ApiResponse<PaginatedResponse<Booking>>>(
-            `${ApiEndpoints.booking.caregiver.upcoming}?${params.toString()}`
-          ),
-          apiClient.get<ApiResponse<PaginatedResponse<Booking>>>(
-            `${ApiEndpoints.booking.caregiver.history}?${params.toString()}`
-          ),
-        ]);
-
-        // Combine all successful results
-        const allBookings: Booking[] = [];
-
-        if (pendingRes.status === 'fulfilled') {
-          const pending = this.extractPaginatedData(pendingRes.value.data);
-          allBookings.push(...pending.data);
-        }
-
-        if (upcomingRes.status === 'fulfilled') {
-          const upcoming = this.extractPaginatedData(upcomingRes.value.data);
-          allBookings.push(...upcoming.data);
-        }
-
-        if (historyRes.status === 'fulfilled') {
-          const history = this.extractPaginatedData(historyRes.value.data);
-          allBookings.push(...history.data);
-        }
-
-        // Return combined results
-        return {
-          data: allBookings,
-          pagination: {
-            currentPage: page,
-            totalPages: 1,
-            totalItems: allBookings.length,
-            itemsPerPage: allBookings.length,
-            hasNextPage: false,
-            hasPreviousPage: false,
-          },
-        };
-      }
-
-      // Determine endpoint based on status
-      let endpoint: string;
-      if (status === BookingStatus.PENDING) {
-        endpoint = ApiEndpoints.booking.caregiver.pending;
-      } else if (status === BookingStatus.CONFIRMED || status === BookingStatus.IN_PROGRESS) {
-        endpoint = ApiEndpoints.booking.caregiver.upcoming;
-      } else if (status === BookingStatus.COMPLETED) {
-        endpoint = ApiEndpoints.booking.caregiver.history;
-      } else {
-        // Default to upcoming if unknown status
-        endpoint = ApiEndpoints.booking.caregiver.upcoming;
+      if (status) {
+        params.append('status', status);
       }
 
       const response = await apiClient.get<ApiResponse<PaginatedResponse<Booking>>>(
-        `${endpoint}?${params.toString()}`
+        `${ApiEndpoints.booking.family.list}?${params.toString()}`
       );
 
       return this.extractPaginatedData(response.data);

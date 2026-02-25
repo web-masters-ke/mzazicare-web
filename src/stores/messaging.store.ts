@@ -319,7 +319,7 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     try {
       const message = await messagingRepository.sendMessage(conversationId, data);
       set((state) => ({
-        messages: [message, ...state.messages],
+        messages: [...state.messages, message],
         conversations: state.conversations.map((c) =>
           c.id === conversationId
             ? {
@@ -624,19 +624,28 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
 
   // Real-time handlers
   handleNewMessage: (message: Message) => {
-    set((state) => ({
-      messages: [message, ...state.messages],
-      conversations: state.conversations.map((c) =>
-        c.id === message.conversationId
-          ? {
-              ...c,
-              lastMessage: message.content,
-              lastMessageAt: message.createdAt,
-              unreadCount: (c.unreadCount || 0) + 1,
-            }
-          : c
-      ),
-    }));
+    set((state) => {
+      // Double-check for duplicates (should be caught earlier but just in case)
+      const messageExists = state.messages.some((m) => m.id === message.id);
+      if (messageExists) {
+        console.warn('⚠️ Duplicate message detected in store, skipping:', message.id);
+        return state;
+      }
+
+      return {
+        messages: [...state.messages, message],
+        conversations: state.conversations.map((c) =>
+          c.id === message.conversationId
+            ? {
+                ...c,
+                lastMessage: message.content,
+                lastMessageAt: message.createdAt,
+                unreadCount: (c.unreadCount || 0) + 1,
+              }
+            : c
+        ),
+      };
+    });
   },
 
   handleMessageRead: (conversationId: string, userId: string, messageIds: string[]) => {

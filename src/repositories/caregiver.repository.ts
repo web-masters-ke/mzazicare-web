@@ -122,9 +122,13 @@ export class CaregiverRepository {
   }
 
   /**
-   * Update caregiver skills
+   * Update caregiver skills with rates
    */
-  async updateSkills(skills: string[]): Promise<any> {
+  async updateSkills(skills: Array<{
+    category: string;
+    hourlyRate: number;
+    experience?: number;
+  }>): Promise<any> {
     try {
       const response = await apiClient.put<ApiResponse<any>>(
         ApiEndpoints.caregiver.updateSkills,

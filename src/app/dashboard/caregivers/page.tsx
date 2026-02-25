@@ -66,15 +66,15 @@ function HeroCard({ caregiver }: { caregiver: CaregiverProfile }) {
       <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6">
         {/* Avatar */}
         <div className="relative flex-shrink-0">
-          {caregiver.user?.profilePhoto ? (
+          {caregiver.profilePhoto ? (
             <img
-              src={caregiver.user.profilePhoto}
-              alt={caregiver.user.fullName || 'Caregiver'}
+              src={caregiver.profilePhoto}
+              alt={caregiver.fullName || 'Caregiver'}
               className="w-24 h-24 rounded-2xl object-cover border-4 border-white/50"
             />
           ) : (
             <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm border-4 border-white/50 flex items-center justify-center text-white text-3xl font-bold">
-              {caregiver.user?.fullName?.charAt(0).toUpperCase() || 'C'}
+              {caregiver.fullName?.charAt(0).toUpperCase() || 'C'}
             </div>
           )}
           <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
@@ -90,7 +90,7 @@ function HeroCard({ caregiver }: { caregiver: CaregiverProfile }) {
             </span>
           </div>
           <h3 className="text-2xl font-bold mb-2">
-            {caregiver.user?.fullName || 'Professional Caregiver'}
+            {caregiver.fullName || 'Professional Caregiver'}
           </h3>
           <p className="text-white/90 mb-4 line-clamp-2">
             {caregiver.bio || 'Experienced professional caregiver'}
@@ -132,15 +132,15 @@ function ListItem({ caregiver }: { caregiver: CaregiverProfile }) {
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        {caregiver.user?.profilePhoto ? (
+        {caregiver.profilePhoto ? (
           <img
-            src={caregiver.user.profilePhoto}
-            alt={caregiver.user.fullName || 'Caregiver'}
+            src={caregiver.profilePhoto}
+            alt={caregiver.fullName || 'Caregiver'}
             className="w-14 h-14 rounded-xl object-cover"
           />
         ) : (
           <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white font-bold">
-            {caregiver.user?.fullName?.charAt(0).toUpperCase() || 'C'}
+            {caregiver.fullName?.charAt(0).toUpperCase() || 'C'}
           </div>
         )}
         {caregiver.verificationStatus === 'APPROVED' && (
@@ -153,7 +153,7 @@ function ListItem({ caregiver }: { caregiver: CaregiverProfile }) {
       {/* Info */}
       <div className="flex-1 min-w-0">
         <h4 className="font-semibold text-dark-900 dark:text-white truncate mb-1">
-          {caregiver.user?.fullName || 'Professional Caregiver'}
+          {caregiver.fullName || 'Professional Caregiver'}
         </h4>
         <div className="flex items-center gap-3 text-sm">
           {caregiver.rating && (
@@ -168,10 +168,10 @@ function ListItem({ caregiver }: { caregiver: CaregiverProfile }) {
       </div>
 
       {/* Skills Badge */}
-      {caregiver.skills && caregiver.skills.length > 0 && (
+      {caregiver.skills && caregiver.skills.length > 0 && caregiver.skills[0]?.category && (
         <div className="hidden sm:flex items-center gap-1.5">
           <span className="px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-lg">
-            {caregiver.skills[0].replace(/_/g, ' ')}
+            {caregiver.skills[0].category.replace(/_/g, ' ')}
           </span>
           {caregiver.skills.length > 1 && (
             <span className="text-xs text-dark-500 dark:text-dark-400">
@@ -199,15 +199,15 @@ function GridCard({ caregiver }: { caregiver: CaregiverProfile }) {
       {/* Header */}
       <div className="flex items-start gap-3 mb-4">
         <div className="relative flex-shrink-0">
-          {caregiver.user?.profilePhoto ? (
+          {caregiver.profilePhoto ? (
             <img
-              src={caregiver.user.profilePhoto}
-              alt={caregiver.user.fullName || 'Caregiver'}
+              src={caregiver.profilePhoto}
+              alt={caregiver.fullName || 'Caregiver'}
               className="w-16 h-16 rounded-xl object-cover"
             />
           ) : (
             <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-xl font-bold">
-              {caregiver.user?.fullName?.charAt(0).toUpperCase() || 'C'}
+              {caregiver.fullName?.charAt(0).toUpperCase() || 'C'}
             </div>
           )}
           {caregiver.verificationStatus === 'APPROVED' && (
@@ -218,7 +218,7 @@ function GridCard({ caregiver }: { caregiver: CaregiverProfile }) {
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-dark-900 dark:text-white truncate mb-1">
-            {caregiver.user?.fullName || 'Professional'}
+            {caregiver.fullName || 'Professional'}
           </h3>
           {caregiver.rating && (
             <div className="flex items-center gap-1">
@@ -247,12 +247,14 @@ function GridCard({ caregiver }: { caregiver: CaregiverProfile }) {
       {caregiver.skills && caregiver.skills.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-4">
           {caregiver.skills.slice(0, 3).map((skill, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-lg"
-            >
-              {skill.replace(/_/g, ' ')}
-            </span>
+            skill?.category ? (
+              <span
+                key={idx}
+                className="px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 text-xs font-semibold rounded-lg"
+              >
+                {skill.category.replace(/_/g, ' ')}
+              </span>
+            ) : null
           ))}
           {caregiver.skills.length > 3 && (
             <span className="px-2.5 py-1 bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-400 text-xs font-semibold rounded-lg">
@@ -304,13 +306,13 @@ function CaregiversContent() {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      caregiver.user?.fullName?.toLowerCase().includes(query) ||
+      caregiver.fullName?.toLowerCase().includes(query) ||
       caregiver.bio?.toLowerCase().includes(query) ||
-      caregiver.skills?.some((skill) => skill.toLowerCase().includes(query))
+      caregiver.skills?.some((skill) => skill.category.toLowerCase().includes(query))
     );
   }).filter((caregiver) => {
     if (!selectedCategory) return true;
-    return caregiver.skills?.includes(selectedCategory);
+    return caregiver.skills?.some((skill) => skill.category === selectedCategory);
   });
 
   // Top performers

@@ -56,15 +56,16 @@ export interface FamilyUser extends User {
 export interface CaregiverProfile {
   id: string;
   userId: string;
-  user?: {
-    id: string;
-    fullName?: string;
-    profilePhoto?: string;
-  };
+  fullName?: string;
+  profilePhoto?: string;
   bio?: string;
   experience?: string;
   certifications?: string[];
-  skills?: string[];
+  skills?: Array<{
+    category: string;
+    hourlyRate?: number;
+    experience?: number;
+  }>;
   hourlyRate?: number;
   availability?: CaregiverAvailability[];
   rating?: number;
@@ -73,6 +74,16 @@ export interface CaregiverProfile {
   documentsVerified?: boolean;
   verificationStatus?: 'PENDING' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED';
   backgroundCheckStatus?: DocumentStatus;
+  isOnline?: boolean;
+  recentReviews?: Array<{
+    id: string;
+    rating: number;
+    comment?: string;
+    tags?: string[];
+    reviewer?: string;
+    reviewerPhoto?: string;
+    createdAt: string;
+  }>;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -225,6 +236,18 @@ export interface Booking {
     status: string;
     method?: string;
     transactionId?: string;
+  };
+  escrow?: {
+    id: string;
+    status: string;
+    amount: number;
+    releaseDeadline?: string;
+    approvedByFamily?: boolean;
+    dispute?: {
+      id: string;
+      reason: string;
+      status: string;
+    } | null;
   };
   escrowReleaseMode?: 'AUTO_RELEASE' | 'FAMILY_APPROVAL';
   confirmedAt?: string | null;

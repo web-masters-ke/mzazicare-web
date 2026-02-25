@@ -1,13 +1,7 @@
-/**
- * Environment Configuration
- * Centralized configuration for API URLs and app settings
- * Mirrors mobile app's EnvConfig
- */
-
 export const EnvConfig = {
   // API Configuration
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api/v1',
-  socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000',
+  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.mzazicare.com/api/v1',
+  socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL || 'https://api.mzazicare.com',
 
   // App Metadata
   appName: process.env.NEXT_PUBLIC_APP_NAME || 'MzaziCare',

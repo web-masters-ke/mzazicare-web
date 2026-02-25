@@ -5,6 +5,7 @@
 
 import { io, Socket } from 'socket.io-client';
 import { useMessagingStore } from '@/stores/messaging.store';
+import { useAuthStore } from '@/stores/auth.store';
 import { pushNotificationService } from '@/services/push-notification.service';
 import {
   MessageNewEvent,
@@ -206,7 +207,26 @@ class MessagingSocketService {
 
   // Message Event Handlers
   private handleNewMessage(event: MessageNewEvent): void {
-    console.log('📨 New message:', event);
+    console.log('📨 New message received:', {
+      id: event.id,
+      conversationId: event.conversationId,
+      from: event.sender?.fullName,
+      content: event.content?.substring(0, 50),
+      type: event.type,
+    });
+
+    // Get current user ID
+    const currentUserId = useAuthStore.getState().user?.id;
+    const currentMessages = useMessagingStore.getState().messages;
+
+    // Check if this is our own message and it already exists (from optimistic update)
+    const isOwnMessage = event.senderId === currentUserId;
+    const messageAlreadyExists = currentMessages.some((m) => m.id === event.id);
+
+    if (isOwnMessage && messageAlreadyExists) {
+      console.log('⏭️ Skipping own message (already in store from optimistic update):', event.id);
+      return;
+    }
 
     const message = {
       id: event.id,
@@ -226,6 +246,7 @@ class MessagingSocketService {
     };
 
     useMessagingStore.getState().handleNewMessage(message);
+    console.log('✅ Message added to store');
 
     // Show push notification if page is not focused and it's not a system message
     if (!document.hasFocus() && event.type !== 'SYSTEM') {

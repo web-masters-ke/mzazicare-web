@@ -119,22 +119,45 @@ function EarningsContent() {
 
   const stats = calculateStats();
 
-  // Filter completed bookings with payment info
+  // Filter completed bookings with payment or escrow info
   const completedBookingsWithPayments = bookings.filter(
-    (booking) => booking.status === 'COMPLETED' && booking.payment
+    (booking) => booking.status === 'COMPLETED' && (booking.payment || booking.escrow)
   );
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
+      case 'RELEASED':
         return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
       case 'pending':
+      case 'HELD':
+      case 'PENDING_RELEASE':
         return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400';
       case 'processing':
         return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+      case 'DISPUTED':
+        return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
       default:
         return 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400';
     }
+  };
+
+  // Helper to get payment status and amount
+  const getPaymentInfo = (booking: typeof bookings[0]) => {
+    let amount = 0;
+    let status = 'pending';
+
+    if (booking.escrow) {
+      amount = Number(booking.caregiverAmount) || Number(booking.escrow.amount) || 0;
+      status = booking.escrow.status;
+    } else if (booking.payment) {
+      amount = Number(booking.payment.amount) || 0;
+      status = booking.payment.status;
+    } else {
+      amount = Number(booking.caregiverAmount) || 0;
+    }
+
+    return { amount, status };
   };
 
   if (isLoading || bookingsLoading) {
@@ -296,57 +319,64 @@ function EarningsContent() {
                     </td>
                   </tr>
                 ) : (
-                  completedBookingsWithPayments.map((booking) => (
-                    <tr
-                      key={booking.id}
-                      className="hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <p className="text-sm font-medium text-dark-900 dark:text-white">
-                            {booking.id.slice(0, 8)}
+                  completedBookingsWithPayments.map((booking) => {
+                    const paymentInfo = getPaymentInfo(booking);
+                    const durationHours = Math.round(booking.duration / 60);
+                    const hourlyRate = durationHours > 0 ? Math.round(paymentInfo.amount / durationHours) : 0;
+
+                    return (
+                      <tr
+                        key={booking.id}
+                        className="hover:bg-dark-100 dark:hover:bg-dark-800 transition-colors cursor-pointer"
+                        onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <p className="text-sm font-medium text-dark-900 dark:text-white">
+                              {booking.id.slice(0, 8)}
+                            </p>
+                            <p className="text-xs text-dark-600 dark:text-dark-400">
+                              {booking.elderly?.fullName || 'N/A'}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm text-dark-900 dark:text-white">
+                            {booking.user?.fullName || 'Unknown'}
                           </p>
-                          <p className="text-xs text-dark-600 dark:text-dark-400">
-                            {booking.elderly?.fullName || 'N/A'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm text-dark-900 dark:text-white">
+                            {new Date(booking.scheduledDate).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
                           </p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm text-dark-900 dark:text-white">
-                          {booking.user?.fullName || 'Unknown'}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm text-dark-900 dark:text-white">
-                          {new Date(booking.scheduledDate).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm text-dark-900 dark:text-white">
-                          {Math.round(booking.duration / 60)}h
-                        </p>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm text-dark-900 dark:text-white">
-                          KES {Math.round((booking.payment?.amount || 0) / (booking.duration / 60))}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm font-semibold text-dark-900 dark:text-white">
-                          KES {(booking.payment?.amount || 0).toLocaleString()}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge className={getStatusColor(booking.payment?.status || 'pending')}>
-                          {booking.payment?.status || 'pending'}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm text-dark-900 dark:text-white">
+                            {durationHours}h
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm text-dark-900 dark:text-white">
+                            KES {hourlyRate.toLocaleString()}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm font-semibold text-dark-900 dark:text-white">
+                            KES {paymentInfo.amount.toLocaleString()}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge className={getStatusColor(paymentInfo.status)}>
+                            {paymentInfo.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
               </table>

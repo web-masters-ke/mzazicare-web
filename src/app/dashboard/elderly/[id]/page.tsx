@@ -6,12 +6,15 @@ import { ProtectedRoute } from '@/components/auth';
 import { DashboardNav } from '@/components/layout/DashboardNav';
 import { useElderly } from '@/hooks/useElderly';
 import { Button, Spinner } from '@/components/ui';
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
 import { motion } from 'framer-motion';
 import { CreateElderlyRequest } from '@/types/models';
 import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   Save,
+  MapPin,
+  RefreshCw,
 } from 'lucide-react';
 
 function EditElderlyContent() {
@@ -33,6 +36,8 @@ function EditElderlyContent() {
     mobilityNotes: '',
     specialInstructions: '',
   });
+
+  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
 
   useEffect(() => {
     if (elderlyId) {
@@ -65,12 +70,60 @@ function EditElderlyContent() {
     }
   }, [currentElderly]);
 
+  const handleRefreshCoordinates = async () => {
+    if (!formData.address) {
+      toast.error('Please enter an address first');
+      return;
+    }
+
+    setIsGeocodingAddress(true);
+    toast.loading('Getting coordinates for this address...', { id: 'geocode' });
+
+    try {
+      const { geocodeAddress } = await import('@/utils/geocoding');
+      const result = await geocodeAddress(formData.address);
+
+      if (result) {
+        setFormData({
+          ...formData,
+          latitude: result.latitude,
+          longitude: result.longitude,
+        });
+        toast.success(`Location found! Lat: ${result.latitude.toFixed(6)}, Lng: ${result.longitude.toFixed(6)}`, { id: 'geocode' });
+      } else {
+        toast.error('Could not find coordinates for this address. Please try a more specific address.', { id: 'geocode' });
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      toast.error('Failed to get coordinates', { id: 'geocode' });
+    } finally {
+      setIsGeocodingAddress(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.fullName || !formData.address) {
       toast.error('Please fill in required fields (Full Name and Address)');
       return;
+    }
+
+    // If coordinates are not set, try to geocode the address
+    if (!formData.latitude || !formData.longitude) {
+      toast.loading('Getting location coordinates...', { id: 'geocode' });
+      const { geocodeAddress } = await import('@/utils/geocoding');
+      const result = await geocodeAddress(formData.address);
+
+      if (result) {
+        formData.latitude = result.latitude;
+        formData.longitude = result.longitude;
+        toast.success('Location found!', { id: 'geocode' });
+      } else {
+        toast.dismiss('geocode');
+        toast.error('Could not find coordinates for this address. Please try a more specific address.');
+        return;
+      }
     }
 
     try {
@@ -183,17 +236,40 @@ function EditElderlyContent() {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                    Address *
-                  </label>
-                  <textarea
-                    required
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-dark-700 dark:text-dark-300">
+                      Address *
+                    </label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRefreshCoordinates}
+                      disabled={isGeocodingAddress || !formData.address}
+                      leftIcon={<RefreshCw className={`w-4 h-4 ${isGeocodingAddress ? 'animate-spin' : ''}`} />}
+                    >
+                      {isGeocodingAddress ? 'Getting...' : 'Refresh Coordinates'}
+                    </Button>
+                  </div>
+                  <AddressAutocomplete
                     value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Enter full address"
+                    onChange={(address, latitude, longitude) => {
+                      setFormData({
+                        ...formData,
+                        address,
+                        latitude,
+                        longitude,
+                      });
+                    }}
+                    placeholder="Start typing to search for address..."
+                    required
                   />
+                  {formData.latitude && formData.longitude && (
+                    <p className="mt-2 text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">

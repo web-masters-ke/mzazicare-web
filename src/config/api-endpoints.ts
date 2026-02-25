@@ -64,6 +64,7 @@ export const ApiEndpoints = {
     match: '/caregivers/match',
     byId: (id: string) => `/caregivers/${id}`,
     reviews: (id: string) => `/caregivers/${id}/reviews`,
+    availability: (id: string) => `/caregivers/${id}/availability`,
   },
 
   // Bookings - Family User
@@ -92,12 +93,11 @@ export const ApiEndpoints = {
 
   // Visits
   visit: {
-    byBookingId: (bookingId: string) => `/visits/booking/${bookingId}`,
-    byId: (visitId: string) => `/visits/${visitId}`,
-    checkIn: (visitId: string) => `/visits/${visitId}/check-in`,
-    checkOut: (visitId: string) => `/visits/${visitId}/check-out`,
-    updateReport: (visitId: string) => `/visits/${visitId}/report`,
-    uploadPhotos: (visitId: string) => `/visits/${visitId}/photos`,
+    byBookingId: (bookingId: string) => `/visits/${bookingId}`,
+    checkIn: (bookingId: string) => `/visits/${bookingId}/check-in`,
+    checkOut: (bookingId: string) => `/visits/${bookingId}/check-out`,
+    submitReport: (bookingId: string) => `/visits/${bookingId}/report`,
+    getReport: (bookingId: string) => `/visits/${bookingId}/report`,
   },
 
   // Wallet & Payments
