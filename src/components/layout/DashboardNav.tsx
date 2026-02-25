@@ -46,7 +46,6 @@ export function DashboardNav() {
   const caregiverNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'My Bookings', href: '/dashboard/bookings', icon: Calendar },
-    { name: 'Available Jobs', href: '/dashboard/jobs', icon: Users },
     { name: 'Earnings', href: '/dashboard/earnings', icon: Wallet },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
   ];

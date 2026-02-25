@@ -31,8 +31,8 @@ export function BottomNav() {
 
   const caregiverNavItems = [
     { name: 'Home', href: '/dashboard', icon: Home },
-    { name: 'Jobs', href: '/dashboard/jobs', icon: Briefcase },
     { name: 'Bookings', href: '/dashboard/bookings', icon: Calendar },
+    { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
     { name: 'Earnings', href: '/dashboard/earnings', icon: TrendingUp },
     { name: 'Profile', href: '/dashboard/profile', icon: UserIcon },
   ];

@@ -176,20 +176,20 @@ function CaregiverDashboardContent() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
-            onClick={() => router.push('/dashboard/jobs')}
+            onClick={() => router.push('/dashboard/bookings')}
             className="bg-dark-50 dark:bg-dark-900 rounded-2xl p-6 border border-dark-100 dark:border-dark-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all group text-left"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/20 rounded-xl flex items-center justify-center group-hover:bg-primary-500 transition-colors">
-                <Briefcase className="w-6 h-6 text-primary-600 dark:text-primary-400 group-hover:text-white" />
+                <Calendar className="w-6 h-6 text-primary-600 dark:text-primary-400 group-hover:text-white" />
               </div>
               <ArrowRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
             </div>
             <h3 className="text-lg font-semibold text-dark-900 dark:text-white mb-1">
-              Find Jobs
+              My Schedule
             </h3>
             <p className="text-sm text-dark-600 dark:text-dark-400">
-              Browse available opportunities
+              View upcoming appointments
             </p>
           </motion.button>
 
@@ -197,20 +197,20 @@ function CaregiverDashboardContent() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
-            onClick={() => router.push('/dashboard/bookings')}
+            onClick={() => router.push('/dashboard/earnings')}
             className="bg-dark-50 dark:bg-dark-900 rounded-2xl p-6 border border-dark-100 dark:border-dark-800 hover:border-accent-500 dark:hover:border-accent-500 transition-all group text-left"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="w-12 h-12 bg-accent-100 dark:bg-accent-900/20 rounded-xl flex items-center justify-center group-hover:bg-accent-500 transition-colors">
-                <Calendar className="w-6 h-6 text-accent-600 dark:text-accent-400 group-hover:text-white" />
+                <DollarSign className="w-6 h-6 text-accent-600 dark:text-accent-400 group-hover:text-white" />
               </div>
               <ArrowRight className="w-5 h-5 text-dark-400 group-hover:text-accent-500 transition-colors" />
             </div>
             <h3 className="text-lg font-semibold text-dark-900 dark:text-white mb-1">
-              My Schedule
+              My Earnings
             </h3>
             <p className="text-sm text-dark-600 dark:text-dark-400">
-              View upcoming appointments
+              View earnings and withdraw funds
             </p>
           </motion.button>
         </div>

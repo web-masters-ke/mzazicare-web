@@ -5,6 +5,7 @@
 
 import { io, Socket } from 'socket.io-client';
 import { useMessagingStore } from '@/stores/messaging.store';
+import { pushNotificationService } from '@/services/push-notification.service';
 import {
   MessageNewEvent,
   MessageReadEvent,
@@ -35,11 +36,11 @@ class MessagingSocketService {
       return;
     }
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4000';
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000';
 
     this.socket = io(wsUrl, {
       auth: {
-        token: `Bearer ${token}`,
+        token: token.startsWith('Bearer ') ? token.substring(7) : token,
       },
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -74,7 +75,8 @@ class MessagingSocketService {
    */
   joinConversation(conversationId: string): void {
     if (this.socket?.connected) {
-      this.socket.emit('conversation:join', { conversationId });
+      this.socket.emit('conversation:join', conversationId);
+      console.log(`📞 Joined conversation: ${conversationId}`);
     }
   }
 
@@ -83,16 +85,26 @@ class MessagingSocketService {
    */
   leaveConversation(conversationId: string): void {
     if (this.socket?.connected) {
-      this.socket.emit('conversation:leave', { conversationId });
+      this.socket.emit('conversation:leave', conversationId);
+      console.log(`📴 Left conversation: ${conversationId}`);
     }
   }
 
   /**
-   * Emit typing indicator
+   * Emit typing indicator - start
    */
-  emitTyping(conversationId: string, isTyping: boolean): void {
+  emitTyping(conversationId: string): void {
     if (this.socket?.connected) {
-      this.socket.emit('typing', { conversationId, isTyping });
+      this.socket.emit('typing:start', { conversationId });
+    }
+  }
+
+  /**
+   * Emit typing indicator - stop
+   */
+  stopTyping(conversationId: string): void {
+    if (this.socket?.connected) {
+      this.socket.emit('typing:stop', { conversationId });
     }
   }
 
@@ -200,6 +212,25 @@ class MessagingSocketService {
     };
 
     useMessagingStore.getState().handleNewMessage(message);
+
+    // Show push notification if page is not focused and it's not a system message
+    if (!document.hasFocus() && event.type !== 'SYSTEM') {
+      const senderName = event.sender?.fullName || 'Someone';
+      const messageText =
+        event.type === 'TEXT'
+          ? event.content
+          : event.type === 'IMAGE'
+          ? '📷 Sent an image'
+          : event.type === 'FILE'
+          ? '📎 Sent a file'
+          : 'Sent a message';
+
+      pushNotificationService.showMessageNotification(
+        senderName,
+        messageText,
+        event.conversationId
+      );
+    }
   }
 
   private handleMessageRead(event: MessageReadEvent): void {
