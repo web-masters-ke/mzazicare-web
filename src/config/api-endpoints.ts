@@ -122,6 +122,8 @@ export const ApiEndpoints = {
     markAsRead: (id: string) => `/notifications/${id}/read`,
     markAllAsRead: '/notifications/read-all',
     delete: (id: string) => `/notifications/${id}`,
+    registerToken: '/notifications/device-token',
+    unregisterToken: '/notifications/device-token',
   },
 
   // Reviews
@@ -154,6 +156,11 @@ export const ApiEndpoints = {
     byId: (id: string) => `/support/tickets/${id}`,
     addMessage: (id: string) => `/support/tickets/${id}/messages`,
     close: (id: string) => `/support/tickets/${id}/close`,
+  },
+
+  // Analytics
+  analytics: {
+    familyDashboard: '/analytics/dashboard/family',
   },
 
   // Messaging

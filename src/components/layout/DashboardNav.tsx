@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
@@ -12,7 +13,6 @@ import {
   Users,
   Heart,
   Settings,
-  Bell,
   Menu,
   X,
   LogOut,
@@ -91,10 +91,7 @@ export function DashboardNav() {
           {/* Right side - Desktop */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             {/* Notifications */}
-            <button className="relative p-2 text-dark-600 hover:text-primary-500 dark:text-dark-400">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationBell />
 
             {/* User Menu */}
             <div className="relative">
