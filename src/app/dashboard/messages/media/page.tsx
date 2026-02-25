@@ -19,7 +19,7 @@ import {
 function MediaGalleryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getMediaGallery } = useMessaging();
+  // const { getMediaGallery } = useMessaging();
 
   const [media, setMedia] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,8 +39,10 @@ function MediaGalleryContent() {
 
     setIsLoading(true);
     try {
-      const mediaData = await getMediaGallery(conversationId, selectedType === 'all' ? undefined : selectedType as any);
-      setMedia(mediaData.data);
+      // TODO: Implement getMediaGallery in useMessaging hook
+      // const mediaData = await getMediaGallery(conversationId, selectedType === 'all' ? undefined : selectedType as any);
+      // setMedia(mediaData.data);
+      setMedia([]);
     } catch (error) {
       console.error('Failed to load media:', error);
     } finally {

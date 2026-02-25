@@ -60,7 +60,7 @@ function MessagesContent() {
     removeReaction,
     scheduleMessage,
     markAsRead,
-    getPinnedMessages,
+    // getPinnedMessages,
   } = useMessaging();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -156,8 +156,10 @@ function MessagesContent() {
   const loadPinnedMessages = useCallback(async () => {
     if (!currentConversation) return;
     try {
-      const pinned = await getPinnedMessages(currentConversation.id);
-      setPinnedMessages(pinned);
+      // TODO: Implement getPinnedMessages in useMessaging hook
+      // const pinned = await getPinnedMessages(currentConversation.id);
+      // setPinnedMessages(pinned);
+      setPinnedMessages([]);
     } catch (error) {
       console.error('Failed to load pinned messages:', error);
     }

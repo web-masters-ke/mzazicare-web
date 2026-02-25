@@ -90,11 +90,9 @@ function ElderlyContent() {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
-      elderly.firstName?.toLowerCase().includes(query) ||
-      elderly.lastName?.toLowerCase().includes(query) ||
+      elderly.fullName?.toLowerCase().includes(query) ||
       elderly.address?.toLowerCase().includes(query) ||
-      elderly.phoneNumber?.includes(query) ||
-      (Array.isArray(elderly.medicalConditions) && elderly.medicalConditions.some((condition) => condition.toLowerCase().includes(query)))
+      elderly.medicalConditions?.toLowerCase().includes(query)
     );
   });
 
@@ -223,10 +221,10 @@ function ElderlyContent() {
                     <div className="relative">
                       {/* Profile Picture */}
                       <div className="w-20 h-20 rounded-2xl bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center overflow-hidden">
-                        {elderly.photoUrl ? (
+                        {elderly.photo ? (
                           <img
-                            src={elderly.photoUrl}
-                            alt={`${elderly.firstName} ${elderly.lastName}`}
+                            src={elderly.photo}
+                            alt={elderly.fullName}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -250,7 +248,7 @@ function ElderlyContent() {
 
                   {/* Name */}
                   <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-1">
-                    {elderly.firstName} {elderly.lastName}
+                    {elderly.fullName}
                   </h3>
 
                   {/* Age Badge */}
@@ -271,37 +269,17 @@ function ElderlyContent() {
                         </span>
                       </div>
                     )}
-                    {elderly.phoneNumber && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="w-4 h-4 text-dark-400 flex-shrink-0" />
-                        <span className="text-dark-700 dark:text-dark-300">
-                          {elderly.phoneNumber}
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   {/* Medical Conditions */}
-                  {Array.isArray(elderly.medicalConditions) && elderly.medicalConditions.length > 0 && (
+                  {elderly.medicalConditions && (
                     <div className="mt-4 pt-4 border-t border-dark-100 dark:border-dark-800">
                       <p className="text-xs font-medium text-dark-600 dark:text-dark-400 mb-2">
                         Medical Conditions
                       </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {elderly.medicalConditions.slice(0, 3).map((condition, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2.5 py-1 rounded-lg text-xs font-medium bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400"
-                          >
-                            {condition}
-                          </span>
-                        ))}
-                        {elderly.medicalConditions.length > 3 && (
-                          <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-dark-100 dark:bg-dark-800 text-dark-700 dark:text-dark-300">
-                            +{elderly.medicalConditions.length - 3}
-                          </span>
-                        )}
-                      </div>
+                      <p className="text-sm text-dark-700 dark:text-dark-300">
+                        {elderly.medicalConditions}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -318,7 +296,7 @@ function ElderlyContent() {
                     Edit Profile
                   </Button>
                   <button
-                    onClick={() => handleDelete(elderly.id, `${elderly.firstName} ${elderly.lastName}`)}
+                    onClick={() => handleDelete(elderly.id, elderly.fullName)}
                     disabled={deletingId === elderly.id}
                     className="px-3 py-2 rounded-xl border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 disabled:opacity-50 transition-colors"
                   >

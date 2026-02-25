@@ -194,7 +194,7 @@ function JobsContent() {
                         <div>
                           <p className="text-xs text-dark-500">Date & Time</p>
                           <p className="font-medium text-dark-900 dark:text-white">
-                            {formatDate(booking.scheduledStartTime)}
+                            {formatDate(booking.scheduledDate)} at {booking.scheduledTime}
                           </p>
                         </div>
                       </div>
@@ -203,7 +203,7 @@ function JobsContent() {
                         <div>
                           <p className="text-xs text-dark-500">Duration</p>
                           <p className="font-medium text-dark-900 dark:text-white">
-                            {formatDuration(booking.scheduledStartTime, booking.scheduledEndTime)}
+                            {booking.duration} hours
                           </p>
                         </div>
                       </div>
