@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth';
 import { DashboardNav } from '@/components/layout/DashboardNav';
 import { useElderly } from '@/hooks/useElderly';
 import { Button } from '@/components/ui';
+import { AddressAutocomplete } from '@/components/ui/AddressAutocomplete';
 import { motion } from 'framer-motion';
 import { UserRole, CreateElderlyRequest } from '@/types/models';
 import toast from 'react-hot-toast';
@@ -38,6 +39,23 @@ function NewElderlyContent() {
     if (!formData.fullName || !formData.address) {
       toast.error('Please fill in required fields (Full Name and Address)');
       return;
+    }
+
+    // If coordinates are not set, try to geocode the address
+    if (!formData.latitude || !formData.longitude) {
+      toast.loading('Getting location coordinates...', { id: 'geocode' });
+      const { geocodeAddress } = await import('@/utils/geocoding');
+      const result = await geocodeAddress(formData.address);
+
+      if (result) {
+        formData.latitude = result.latitude;
+        formData.longitude = result.longitude;
+        toast.success('Location found!', { id: 'geocode' });
+      } else {
+        toast.dismiss('geocode');
+        toast.error('Could not find coordinates for this address. Please try a more specific address.');
+        return;
+      }
     }
 
     try {
@@ -142,13 +160,18 @@ function NewElderlyContent() {
                   <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
                     Address *
                   </label>
-                  <textarea
-                    required
+                  <AddressAutocomplete
                     value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Enter full address"
+                    onChange={(address, latitude, longitude) => {
+                      setFormData({
+                        ...formData,
+                        address,
+                        latitude,
+                        longitude,
+                      });
+                    }}
+                    placeholder="Start typing to search for address..."
+                    required
                   />
                 </div>
                 <div>
