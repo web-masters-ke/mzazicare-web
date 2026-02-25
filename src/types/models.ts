@@ -243,6 +243,7 @@ export interface Booking {
     amount: number;
     releaseDeadline?: string;
     approvedByFamily?: boolean;
+    releaseMode?: 'AUTO_RELEASE' | 'FAMILY_APPROVAL';
     dispute?: {
       id: string;
       reason: string;
@@ -273,6 +274,13 @@ export interface BookingElderlyInfo {
   lastName?: string;
   photo?: string;
   photoUrl?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  locationNotes?: string;
+  medicalConditions?: string;
+  medications?: string;
+  mobilityNotes?: string;
+  specialInstructions?: string;
 }
 
 export interface BookingCaregiverInfo {
