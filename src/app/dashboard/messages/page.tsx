@@ -63,6 +63,8 @@ function MessagesContent() {
     // getPinnedMessages,
   } = useMessaging();
 
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [messageText, setMessageText] = useState('');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
@@ -89,6 +91,7 @@ function MessagesContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchedConversationId = useRef<string | null>(null);
+  const currentRoomId = useRef<string | null>(null);
 
   useEffect(() => {
     currentUserId.current = user?.id || '';
@@ -101,6 +104,31 @@ function MessagesContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Check WebSocket connection status and handle reconnections
+  useEffect(() => {
+    let wasConnected = messagingSocket.isConnected();
+
+    const checkConnection = setInterval(() => {
+      const isConnected = messagingSocket.isConnected();
+      setIsSocketConnected(isConnected);
+
+      // Detect reconnection
+      if (!wasConnected && isConnected) {
+        console.log('🔄 WebSocket reconnected - rejoining conversation');
+
+        // Rejoin the current conversation room
+        if (currentConversation && currentRoomId.current) {
+          messagingSocket.joinConversation(currentConversation.id);
+          console.log(`📞 Rejoined conversation after reconnection: ${currentConversation.id}`);
+        }
+      }
+
+      wasConnected = isConnected;
+    }, 1000);
+
+    return () => clearInterval(checkConnection);
+  }, [currentConversation]);
 
   useEffect(() => {
     const conversationId = searchParams.get('conversation');
@@ -118,30 +146,47 @@ function MessagesContent() {
 
   useEffect(() => {
     if (!currentConversation) {
+      // Leave current room if any
+      if (currentRoomId.current) {
+        messagingSocket.leaveConversation(currentRoomId.current);
+        currentRoomId.current = null;
+      }
       lastFetchedConversationId.current = null;
       return;
     }
 
-    if (currentConversation.id !== lastFetchedConversationId.current) {
-      lastFetchedConversationId.current = currentConversation.id;
+    const conversationId = currentConversation.id;
 
-      fetchMessages(currentConversation.id);
-      markAsRead(currentConversation.id);
-      messagingSocket.joinConversation(currentConversation.id);
-
-      // Fetch pinned messages
+    // Only fetch messages if this is a new conversation
+    if (conversationId !== lastFetchedConversationId.current) {
+      lastFetchedConversationId.current = conversationId;
+      fetchMessages(conversationId);
+      markAsRead(conversationId);
       loadPinnedMessages();
-
-      return () => {
-        messagingSocket.leaveConversation(currentConversation.id);
-      };
-    } else {
-      // Already fetched, just join conversation
-      messagingSocket.joinConversation(currentConversation.id);
-      return () => {
-        messagingSocket.leaveConversation(currentConversation.id);
-      };
     }
+
+    // Join conversation room if not already in it
+    if (currentRoomId.current !== conversationId) {
+      // Leave previous room if any
+      if (currentRoomId.current) {
+        messagingSocket.leaveConversation(currentRoomId.current);
+        console.log(`📴 Left conversation: ${currentRoomId.current}`);
+      }
+
+      // Join new room
+      messagingSocket.joinConversation(conversationId);
+      currentRoomId.current = conversationId;
+      console.log(`📞 Joined conversation: ${conversationId}`);
+    }
+
+    // Cleanup on unmount - leave the room
+    return () => {
+      if (currentRoomId.current === conversationId) {
+        messagingSocket.leaveConversation(conversationId);
+        currentRoomId.current = null;
+        console.log(`📴 Cleanup - Left conversation: ${conversationId}`);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConversation?.id]);
 
@@ -365,11 +410,37 @@ function MessagesContent() {
     const date = new Date(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / (1000 * 60));
     const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
-    return date.toLocaleDateString();
+    // Show time in 12-hour format for messages from today
+    if (days === 0) {
+      return date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    // Show "Yesterday" with time for yesterday's messages
+    if (days === 1) {
+      const time = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      return `Yesterday ${time}`;
+    }
+
+    // Show date and time for older messages
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   const getOtherParticipant = (conversation: any) => {
@@ -533,7 +604,20 @@ function MessagesContent() {
                       <p className="font-semibold text-dark-900 dark:text-white">
                         {getOtherParticipant(currentConversation)?.fullName}
                       </p>
-                      <p className="text-xs text-dark-500">Online</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-dark-500">Online</p>
+                        {isSocketConnected ? (
+                          <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-400 animate-pulse" />
+                            Real-time
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400" />
+                            Connecting...
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -612,8 +696,6 @@ function MessagesContent() {
                   ) : (
                     <>
                       {(messages || [])
-                        .slice()
-                        .reverse()
                         .map((message) => {
                           const isOwn = message.senderId === currentUserId.current;
                           const isPinned = isMessagePinned(message.id);
@@ -912,7 +994,12 @@ function MessagesContent() {
                       type="text"
                       value={messageText}
                       onChange={handleTyping}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
                       placeholder="Type a message..."
                       className="flex-1 px-4 py-3 rounded-2xl bg-dark-100 dark:bg-dark-800 border border-dark-200 dark:border-dark-700 text-dark-900 dark:text-white placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
                     />
