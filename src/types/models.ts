@@ -237,6 +237,18 @@ export interface Booking {
     method?: string;
     transactionId?: string;
   };
+  escrow?: {
+    id: string;
+    status: string;
+    amount: number;
+    releaseDeadline?: string;
+    approvedByFamily?: boolean;
+    dispute?: {
+      id: string;
+      reason: string;
+      status: string;
+    } | null;
+  };
   escrowReleaseMode?: 'AUTO_RELEASE' | 'FAMILY_APPROVAL';
   confirmedAt?: string | null;
   cancelledAt?: string | null;

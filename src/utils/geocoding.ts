@@ -8,6 +8,15 @@ export interface GeocodeResult {
   formattedAddress: string;
 }
 
+export interface ReverseGeocodeResult {
+  formatted: string;
+  street?: string;
+  neighborhood?: string;
+  sublocality?: string;
+  locality?: string;
+  country?: string;
+}
+
 /**
  * Geocode an address to get coordinates
  */
@@ -48,9 +57,9 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult | n
 }
 
 /**
- * Reverse geocode coordinates to get address
+ * Reverse geocode coordinates to get detailed address
  */
-export async function reverseGeocode(latitude: number, longitude: number): Promise<string | null> {
+export async function reverseGeocode(latitude: number, longitude: number): Promise<ReverseGeocodeResult | null> {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   if (!apiKey) {
@@ -70,7 +79,40 @@ export async function reverseGeocode(latitude: number, longitude: number): Promi
     const data = await response.json();
 
     if (data.status === 'OK' && data.results.length > 0) {
-      return data.results[0].formatted_address;
+      // Find the best result with street address
+      const streetResult = data.results.find((result: any) => {
+        const types = result.types || [];
+        return types.includes('street_address') || types.includes('route') || types.includes('premise');
+      });
+
+      // Find neighborhood
+      const neighborhoodResult = data.results.find((result: any) => {
+        const types = result.types || [];
+        return types.includes('neighborhood');
+      });
+
+      // Get all components from all results
+      const allComponents = data.results.flatMap((r: any) => r.address_components || []);
+
+      // Extract address parts
+      const street = allComponents.find((c: any) => c.types.includes('route'))?.long_name;
+      const neighborhood = allComponents.find((c: any) => c.types.includes('neighborhood'))?.long_name;
+      const sublocality = allComponents.find((c: any) => c.types.includes('sublocality'))?.long_name;
+      const locality = allComponents.find((c: any) => c.types.includes('locality'))?.long_name;
+      const country = allComponents.find((c: any) => c.types.includes('country'))?.long_name;
+
+      // Build formatted address
+      const parts = [street, neighborhood, sublocality, locality, country].filter(Boolean);
+      const formatted = parts.join(', ') || data.results[0].formatted_address;
+
+      return {
+        formatted,
+        street,
+        neighborhood,
+        sublocality,
+        locality,
+        country,
+      };
     }
 
     return null;

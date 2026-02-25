@@ -63,6 +63,12 @@ function BookingDetailsContent() {
   });
   const [taskInput, setTaskInput] = useState('');
   const [visit, setVisit] = useState<any>(null);
+  const [checkInAddress, setCheckInAddress] = useState<any>(null);
+  const [checkOutAddress, setCheckOutAddress] = useState<any>(null);
+  const [isApprovingPayment, setIsApprovingPayment] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('');
+  const [isDisputingPayment, setIsDisputingPayment] = useState(false);
 
   useEffect(() => {
     if (bookingId) {
@@ -87,6 +93,24 @@ function BookingDetailsContent() {
       if (response.ok) {
         const data = await response.json();
         setVisit(data.data);
+
+        // Reverse geocode check-in location
+        if (data.data?.checkInLat && data.data?.checkInLng) {
+          const { reverseGeocode } = await import('@/utils/geocoding');
+          const addressDetails = await reverseGeocode(data.data.checkInLat, data.data.checkInLng);
+          if (addressDetails) {
+            setCheckInAddress(addressDetails);
+          }
+        }
+
+        // Reverse geocode check-out location
+        if (data.data?.checkOutLat && data.data?.checkOutLng) {
+          const { reverseGeocode } = await import('@/utils/geocoding');
+          const addressDetails = await reverseGeocode(data.data.checkOutLat, data.data.checkOutLng);
+          if (addressDetails) {
+            setCheckOutAddress(addressDetails);
+          }
+        }
       }
     } catch (error) {
       console.log('No visit data yet');
@@ -364,6 +388,76 @@ function BookingDetailsContent() {
       toast.error(error.message || 'Failed to submit report. Please try again.');
     } finally {
       setIsSubmittingReport(false);
+    }
+  };
+
+  const handleApprovePayment = async () => {
+    if (!currentBooking?.escrow?.id) return;
+
+    setIsApprovingPayment(true);
+    try {
+      const { EnvConfig } = await import('@/config/env.config');
+      const { storageService } = await import('@/services/storage/storage.service');
+
+      const accessToken = await storageService.getAccessToken();
+      const response = await fetch(`${EnvConfig.baseUrl}/escrow/${currentBooking.escrow.id}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to approve payment');
+      }
+
+      toast.success('Payment approved! Funds released to caregiver.', { icon: '✅' });
+      fetchBookingById(bookingId);
+    } catch (error: any) {
+      console.error('Payment approval failed:', error);
+      toast.error(error.message || 'Failed to approve payment. Please try again.');
+    } finally {
+      setIsApprovingPayment(false);
+    }
+  };
+
+  const handleDisputePayment = async () => {
+    if (!currentBooking?.escrow?.id) return;
+    if (!disputeReason.trim()) {
+      toast.error('Please provide a reason for the dispute');
+      return;
+    }
+
+    setIsDisputingPayment(true);
+    try {
+      const { EnvConfig } = await import('@/config/env.config');
+      const { storageService } = await import('@/services/storage/storage.service');
+
+      const accessToken = await storageService.getAccessToken();
+      const response = await fetch(`${EnvConfig.baseUrl}/escrow/${currentBooking.escrow.id}/dispute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ reason: disputeReason }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to dispute payment');
+      }
+
+      toast.success('Dispute submitted. Our team will review it.', { icon: '⚠️' });
+      setShowDisputeModal(false);
+      fetchBookingById(bookingId);
+    } catch (error: any) {
+      console.error('Payment dispute failed:', error);
+      toast.error(error.message || 'Failed to dispute payment. Please try again.');
+    } finally {
+      setIsDisputingPayment(false);
     }
   };
 
@@ -815,7 +909,7 @@ function BookingDetailsContent() {
                         <p className="font-medium text-dark-900 dark:text-white">
                           {new Date(visit.checkInTime).toLocaleString()}
                         </p>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
                           {visit.checkInVerified ? (
                             <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
                               <CheckCircle className="w-3 h-3" />
@@ -828,10 +922,48 @@ function BookingDetailsContent() {
                             </span>
                           )}
                         </div>
-                        {visit.checkInLat && visit.checkInLng && userRole === UserRole.CAREGIVER && (
-                          <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">
-                            Lat: {visit.checkInLat.toFixed(6)}, Lng: {visit.checkInLng.toFixed(6)}
-                          </p>
+                        {visit.checkInLat && visit.checkInLng && (
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-start gap-2">
+                              <MapPin className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 space-y-1">
+                                {checkInAddress ? (
+                                  <>
+                                    {checkInAddress.street && (
+                                      <p className="text-sm font-medium text-dark-900 dark:text-white">
+                                        {checkInAddress.street}
+                                      </p>
+                                    )}
+                                    <div className="flex flex-wrap gap-1 text-xs text-dark-600 dark:text-dark-400">
+                                      {checkInAddress.sublocality && (
+                                        <span className="px-2 py-0.5 bg-dark-100 dark:bg-dark-800 rounded">
+                                          {checkInAddress.sublocality}
+                                        </span>
+                                      )}
+                                      {checkInAddress.locality && (
+                                        <span className="px-2 py-0.5 bg-dark-100 dark:bg-dark-800 rounded">
+                                          {checkInAddress.locality}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <p className="text-xs text-dark-500 dark:text-dark-400">
+                                    {visit.checkInLat.toFixed(6)}, {visit.checkInLng.toFixed(6)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${visit.checkInLat},${visit.checkInLng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 hover:underline ml-6"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              View on Google Maps
+                            </a>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -850,21 +982,172 @@ function BookingDetailsContent() {
                             Duration: {formatDuration(visit.actualDuration)}
                           </p>
                         )}
-                        {visit.checkOutLat && visit.checkOutLng && userRole === UserRole.CAREGIVER && (
-                          <p className="text-xs text-dark-500 dark:text-dark-400 mt-1">
-                            Lat: {visit.checkOutLat.toFixed(6)}, Lng: {visit.checkOutLng.toFixed(6)}
-                          </p>
+                        {visit.checkOutLat && visit.checkOutLng && (
+                          <div className="mt-2 space-y-2">
+                            <div className="flex items-start gap-2">
+                              <MapPin className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 space-y-1">
+                                {checkOutAddress ? (
+                                  <>
+                                    {checkOutAddress.street && (
+                                      <p className="text-sm font-medium text-dark-900 dark:text-white">
+                                        {checkOutAddress.street}
+                                      </p>
+                                    )}
+                                    <div className="flex flex-wrap gap-1 text-xs text-dark-600 dark:text-dark-400">
+                                      {checkOutAddress.sublocality && (
+                                        <span className="px-2 py-0.5 bg-dark-100 dark:bg-dark-800 rounded">
+                                          {checkOutAddress.sublocality}
+                                        </span>
+                                      )}
+                                      {checkOutAddress.locality && (
+                                        <span className="px-2 py-0.5 bg-dark-100 dark:bg-dark-800 rounded">
+                                          {checkOutAddress.locality}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <p className="text-xs text-dark-500 dark:text-dark-400">
+                                    {visit.checkOutLat.toFixed(6)}, {visit.checkOutLng.toFixed(6)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${visit.checkOutLat},${visit.checkOutLng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 hover:underline ml-6"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              View on Google Maps
+                            </a>
+                          </div>
                         )}
                       </div>
                     </div>
                   )}
-                  {visit.report && (
-                    <div className="pt-3 border-t border-dark-200 dark:border-dark-700">
-                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                        <FileText className="w-4 h-4" />
-                        <span className="text-sm font-medium">Visit report submitted</span>
+                </div>
+              </div>
+            )}
+
+            {/* Visit Report Section */}
+            {visit?.report && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-dark-900 dark:text-white flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary-500" />
+                    Visit Report
+                  </h2>
+                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">
+                    Submitted
+                  </Badge>
+                </div>
+                <div className="space-y-4">
+                  {/* Tasks Completed */}
+                  <div className="bg-dark-50 dark:bg-dark-800 rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-dark-900 dark:text-white mb-3">
+                      Tasks Completed
+                    </h3>
+                    <div className="space-y-2">
+                      {(() => {
+                        try {
+                          const tasks = typeof visit.report.tasksCompleted === 'string'
+                            ? JSON.parse(visit.report.tasksCompleted)
+                            : visit.report.tasksCompleted;
+                          return Array.isArray(tasks) && tasks.length > 0 ? (
+                            tasks.map((task: string, index: number) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-sm text-dark-700 dark:text-dark-300">{task}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-dark-500 dark:text-dark-400">No tasks listed</p>
+                          );
+                        } catch {
+                          return <p className="text-sm text-dark-500 dark:text-dark-400">Error loading tasks</p>;
+                        }
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Observations */}
+                  {visit.report.observations && (
+                    <div className="bg-dark-50 dark:bg-dark-800 rounded-xl p-4">
+                      <h3 className="text-sm font-semibold text-dark-900 dark:text-white mb-2">
+                        Observations
+                      </h3>
+                      <p className="text-sm text-dark-700 dark:text-dark-300 whitespace-pre-wrap">
+                        {visit.report.observations}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Issues */}
+                  {visit.report.issues && (
+                    <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-900/20 rounded-xl p-4">
+                      <h3 className="text-sm font-semibold text-orange-900 dark:text-orange-100 mb-2 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4" />
+                        Issues Reported
+                      </h3>
+                      <p className="text-sm text-orange-800 dark:text-orange-200 whitespace-pre-wrap">
+                        {visit.report.issues}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Risk Level */}
+                  {visit.report.riskLevel && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-dark-700 dark:text-dark-300">
+                        Risk Level:
+                      </span>
+                      <Badge
+                        className={
+                          visit.report.riskLevel === 'low'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                            : visit.report.riskLevel === 'medium'
+                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+                            : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                        }
+                      >
+                        {visit.report.riskLevel.toUpperCase()}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Photos */}
+                  {visit.report.photos && Array.isArray(visit.report.photos) && visit.report.photos.length > 0 && (
+                    <div className="bg-dark-50 dark:bg-dark-800 rounded-xl p-4">
+                      <h3 className="text-sm font-semibold text-dark-900 dark:text-white mb-3">
+                        Photos
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {visit.report.photos.map((photo: string, index: number) => (
+                          <img
+                            key={index}
+                            src={photo}
+                            alt={`Visit photo ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                        ))}
                       </div>
                     </div>
+                  )}
+
+                  {/* Submitted Date */}
+                  {visit.report.createdAt && (
+                    <p className="text-xs text-dark-500 dark:text-dark-400">
+                      Submitted on {new Date(visit.report.createdAt).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
                   )}
                 </div>
               </div>
@@ -883,7 +1166,7 @@ function BookingDetailsContent() {
             )}
           </div>
 
-          {/* Actions - Family User */}
+          {/* Actions - Family User - Cancel/Reschedule */}
           {canCancel && userRole === UserRole.FAMILY_USER && (
             <div className="p-6 border-t border-dark-100 dark:border-dark-800 flex gap-3">
               <Button
@@ -908,6 +1191,43 @@ function BookingDetailsContent() {
               >
                 Cancel Booking
               </Button>
+            </div>
+          )}
+
+          {/* Actions - Family User - Approve Payment */}
+          {userRole === UserRole.FAMILY_USER &&
+           booking.status === BookingStatus.COMPLETED &&
+           booking.escrow?.status === 'PENDING_RELEASE' &&
+           !booking.escrow?.approvedByFamily && (
+            <div className="p-6 border-t border-dark-100 dark:border-dark-800">
+              <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/20 rounded-xl">
+                <h3 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-2">
+                  Payment Approval Required
+                </h3>
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  The visit has been completed. Please review the visit report and approve the payment to release funds to the caregiver.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="danger"
+                  onClick={() => setShowDisputeModal(true)}
+                  leftIcon={<XCircle className="w-5 h-5" />}
+                  disabled={isApprovingPayment}
+                  className="flex-1"
+                >
+                  Dispute Payment
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleApprovePayment}
+                  leftIcon={<CheckCircle className="w-5 h-5" />}
+                  disabled={isApprovingPayment || isDisputingPayment}
+                  className="flex-1"
+                >
+                  {isApprovingPayment ? 'Approving...' : 'Approve & Release Payment'}
+                </Button>
+              </div>
             </div>
           )}
 
@@ -1259,6 +1579,52 @@ function BookingDetailsContent() {
                 className="flex-1"
               >
                 {isSubmittingReport ? 'Submitting...' : 'Submit Report'}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Dispute Payment Modal */}
+      {showDisputeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-dark-900 rounded-2xl max-w-md w-full p-6"
+          >
+            <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-4">
+              Dispute Payment
+            </h3>
+            <p className="text-dark-600 dark:text-dark-400 mb-4">
+              Please provide a reason for disputing this payment. This will pause the payment release and notify our support team to review the visit.
+            </p>
+            <textarea
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+              placeholder="Describe the issue (e.g., caregiver arrived late, tasks not completed, quality concerns)..."
+              rows={5}
+              className="w-full p-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white placeholder:text-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4"
+            />
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowDisputeModal(false);
+                  setDisputeReason('');
+                }}
+                disabled={isDisputingPayment}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleDisputePayment}
+                disabled={isDisputingPayment || !disputeReason.trim()}
+                className="flex-1"
+              >
+                {isDisputingPayment ? 'Submitting...' : 'Submit Dispute'}
               </Button>
             </div>
           </motion.div>
