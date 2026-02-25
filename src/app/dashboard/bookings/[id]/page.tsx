@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useBookings } from '@/hooks/useBookings';
 import { useMessaging } from '@/hooks/useMessaging';
 import { Button, Badge, Spinner } from '@/components/ui';
+import { RescheduleBookingModal } from '@/components/bookings';
 import { motion } from 'framer-motion';
 import { BookingStatus, UserRole, ConversationType } from '@/types/models';
 import toast from 'react-hot-toast';
@@ -44,8 +45,6 @@ function BookingDetailsContent() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
-  const [newDateTime, setNewDateTime] = useState('');
-  const [isRescheduling, setIsRescheduling] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
@@ -139,35 +138,9 @@ function BookingDetailsContent() {
     }
   };
 
-  const handleReschedule = async () => {
-    if (!newDateTime) {
-      toast.error('Please select a new date and time');
-      return;
-    }
-
-    setIsRescheduling(true);
-    try {
-      // Parse the datetime-local input
-      const dateTime = new Date(newDateTime);
-
-      // Extract date in ISO format
-      const scheduledDate = dateTime.toISOString();
-
-      // Extract time in HH:MM format
-      const hours = dateTime.getHours().toString().padStart(2, '0');
-      const minutes = dateTime.getMinutes().toString().padStart(2, '0');
-      const scheduledTime = `${hours}:${minutes}`;
-
-      await rescheduleBooking(bookingId, scheduledDate, scheduledTime);
-      toast.success('Booking rescheduled successfully!', { icon: '📅' });
-      setShowRescheduleModal(false);
-      fetchBookingById(bookingId);
-    } catch (error: any) {
-      console.error('Failed to reschedule booking:', error);
-      toast.error(error.response?.data?.message || error.message || 'Failed to reschedule booking. Please try again.');
-    } finally {
-      setIsRescheduling(false);
-    }
+  const handleReschedule = async (scheduledDate: string, scheduledTime: string) => {
+    await rescheduleBooking(bookingId, scheduledDate, scheduledTime);
+    fetchBookingById(bookingId);
   };
 
   const handleMessage = async () => {
@@ -1353,56 +1326,12 @@ function BookingDetailsContent() {
       )}
 
       {/* Reschedule Modal */}
-      {showRescheduleModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-dark-900 rounded-2xl max-w-md w-full p-6"
-          >
-            <h3 className="text-xl font-bold text-dark-900 dark:text-white mb-4">
-              Reschedule Booking
-            </h3>
-            <p className="text-dark-600 dark:text-dark-400 mb-4">
-              Select a new date and time for this booking:
-            </p>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-                New Date & Time *
-              </label>
-              <input
-                type="datetime-local"
-                value={newDateTime}
-                onChange={(e) => setNewDateTime(e.target.value)}
-                className="w-full p-3 rounded-xl border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-800 text-dark-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              <p className="mt-2 text-sm text-dark-500 dark:text-dark-400">
-                Note: Duration will remain the same ({formatDuration(currentBooking?.duration || currentBooking?.durationMinutes || 0)})
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                onClick={() => setShowRescheduleModal(false)}
-                disabled={isRescheduling}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleReschedule}
-                disabled={isRescheduling || !newDateTime}
-                className="flex-1"
-              >
-                {isRescheduling ? 'Rescheduling...' : 'Confirm Reschedule'}
-              </Button>
-            </div>
-          </motion.div>
-        </div>
-      )}
+      <RescheduleBookingModal
+        isOpen={showRescheduleModal}
+        onClose={() => setShowRescheduleModal(false)}
+        booking={currentBooking}
+        onReschedule={handleReschedule}
+      />
 
       {/* Decline Modal */}
       {showDeclineModal && (
