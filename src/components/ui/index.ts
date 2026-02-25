@@ -4,3 +4,6 @@ export { StatCard } from './StatCard';
 export { Badge } from './Badge';
 export { Avatar } from './Avatar';
 export { Spinner } from './Spinner';
+export { AvailabilityCalendar } from './AvailabilityCalendar';
+export { CaregiverCalendar } from './CaregiverCalendar';
+export { AddressAutocomplete } from './AddressAutocomplete';
