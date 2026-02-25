@@ -107,11 +107,7 @@ class PushNotificationService {
         url: `/dashboard/messages?conversation=${conversationId}`,
       },
       requireInteraction: false,
-      actions: [
-        { action: 'view', title: 'View' },
-        { action: 'dismiss', title: 'Dismiss' },
-      ],
-    });
+    } as any);
   }
 
   /**
@@ -131,11 +127,7 @@ class PushNotificationService {
         url: `/dashboard/bookings/${bookingId}`,
       },
       requireInteraction: true,
-      actions: [
-        { action: 'view', title: 'View Booking' },
-        { action: 'dismiss', title: 'Dismiss' },
-      ],
-    });
+    } as any);
   }
 
   /**
