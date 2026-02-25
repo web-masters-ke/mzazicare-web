@@ -30,7 +30,7 @@ export function BottomNav() {
   ];
 
   const caregiverNavItems = [
-    { name: 'Home', href: '/dashboard', icon: Home },
+    { name: 'Home', href: '/dashboard/caregiver', icon: Home },
     { name: 'Bookings', href: '/dashboard/bookings', icon: Calendar },
     { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
     { name: 'Earnings', href: '/dashboard/earnings', icon: TrendingUp },
@@ -42,6 +42,9 @@ export function BottomNav() {
   const isActive = (href: string) => {
     if (href === '/dashboard') {
       return pathname === '/dashboard';
+    }
+    if (href === '/dashboard/caregiver') {
+      return pathname === '/dashboard/caregiver' || pathname === '/dashboard/caregiver/settings';
     }
     return pathname.startsWith(href);
   };

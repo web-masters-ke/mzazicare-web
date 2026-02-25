@@ -27,6 +27,10 @@ import {
   Mail,
   Phone,
   Camera,
+  Briefcase,
+  DollarSign,
+  Calendar,
+  Star,
 } from 'lucide-react';
 
 interface MenuItemProps {
@@ -201,11 +205,75 @@ function ProfileContent() {
           </div>
         </motion.div>
 
+        {/* Caregiver Settings Section - Only for Caregivers */}
+        {user.role === 'CAREGIVER' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6"
+          >
+            <h2 className="text-sm font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wide mb-3">
+              Professional Profile
+            </h2>
+
+            {/* Featured Card */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-2xl border-2 border-green-300 dark:border-green-700 p-6 mb-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Briefcase className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-green-900 dark:text-green-100 mb-2">
+                    Set Your Rates & Services
+                  </h3>
+                  <p className="text-sm text-green-700 dark:text-green-300 mb-4">
+                    Manage your professional profile: set hourly rates for each service, add your experience, and update your availability to start getting bookings.
+                  </p>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    leftIcon={<DollarSign className="w-4 h-4" />}
+                    onClick={() => router.push('/dashboard/caregiver/settings')}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Manage Professional Settings
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="bg-dark-50 dark:bg-dark-900 rounded-2xl border border-dark-100 dark:border-dark-800 overflow-hidden">
+              <MenuItem
+                icon={<DollarSign className="w-5 h-5" />}
+                title="Skills & Hourly Rates"
+                subtitle="Set your rates for each service"
+                onClick={() => router.push('/dashboard/caregiver/settings?tab=skills')}
+              />
+              <div className="border-t border-dark-100 dark:border-dark-800" />
+              <MenuItem
+                icon={<Calendar className="w-5 h-5" />}
+                title="Availability Schedule"
+                subtitle="Set your working hours"
+                onClick={() => router.push('/dashboard/caregiver/settings?tab=availability')}
+              />
+              <div className="border-t border-dark-100 dark:border-dark-800" />
+              <MenuItem
+                icon={<FileText className="w-5 h-5" />}
+                title="Professional Bio"
+                subtitle="Tell families about yourself"
+                onClick={() => router.push('/dashboard/caregiver/settings?tab=bio')}
+              />
+            </div>
+          </motion.div>
+        )}
+
         {/* Account Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: user.role === 'CAREGIVER' ? 0.2 : 0.1 }}
           className="mb-6"
         >
           <h2 className="text-sm font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wide mb-3">
@@ -239,7 +307,7 @@ function ProfileContent() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: user.role === 'CAREGIVER' ? 0.3 : 0.2 }}
           className="mb-6"
         >
           <h2 className="text-sm font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wide mb-3">
@@ -273,7 +341,7 @@ function ProfileContent() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: user.role === 'CAREGIVER' ? 0.4 : 0.3 }}
           className="mb-6"
         >
           <h2 className="text-sm font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wide mb-3">
@@ -307,7 +375,7 @@ function ProfileContent() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: user.role === 'CAREGIVER' ? 0.5 : 0.4 }}
           className="mb-6"
         >
           <h2 className="text-sm font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wide mb-3">
@@ -328,7 +396,7 @@ function ProfileContent() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: user.role === 'CAREGIVER' ? 0.6 : 0.5 }}
           className="mb-6"
         >
           <div className="bg-dark-50 dark:bg-dark-900 rounded-2xl border border-dark-100 dark:border-dark-800 overflow-hidden">
