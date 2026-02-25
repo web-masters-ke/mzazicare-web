@@ -62,6 +62,8 @@ export function PaymentStatusModal({
         attempts++;
         const result = await getTopUpStatus(checkoutRequestId);
 
+        console.log('[Payment Polling] Attempt', attempts, 'Result:', result);
+
         if (result.status === 'completed') {
           setStatus('completed');
           if (pollingIntervalRef.current) {

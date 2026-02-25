@@ -124,6 +124,126 @@ export class WalletRepository {
   }
 
   /**
+   * Get wallet overview with escrow stats
+   */
+  async getWalletOverview(): Promise<any> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(
+        `${ApiEndpoints.wallet.get}/overview`
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get my escrows
+   */
+  async getMyEscrows(status?: string, page: number = 1, limit: number = 20): Promise<any> {
+    try {
+      const params = new URLSearchParams();
+      if (status) params.append('status', status);
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+
+      const response = await apiClient.get<ApiResponse<any>>(
+        `/escrow/my-escrows?${params.toString()}`
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Get escrow details
+   */
+  async getEscrowDetails(escrowId: string): Promise<any> {
+    try {
+      const response = await apiClient.get<ApiResponse<any>>(
+        `/escrow/${escrowId}`
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Approve escrow release
+   */
+  async approveEscrowRelease(escrowId: string): Promise<any> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>(
+        `/escrow/${escrowId}/approve`
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * File dispute
+   */
+  async fileDispute(escrowId: string, data: {
+    reason: string;
+    description: string;
+    evidence?: string[];
+  }): Promise<any> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>(
+        `/escrow/${escrowId}/dispute`,
+        data
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Withdraw dispute
+   */
+  async withdrawDispute(escrowId: string): Promise<any> {
+    try {
+      const response = await apiClient.post<ApiResponse<any>>(
+        `/escrow/${escrowId}/withdraw-dispute`
+      );
+
+      return this.extractData(response.data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Download wallet statement as PDF
+   */
+  async downloadStatement(startDate?: string, endDate?: string): Promise<Blob> {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      const response = await apiClient.get(
+        `${ApiEndpoints.wallet.get}/statement?${params.toString()}`,
+        { responseType: 'blob' }
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Extract data from API response
    */
   private extractData<T>(response: ApiResponse<T>): T {

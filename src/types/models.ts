@@ -234,6 +234,10 @@ export interface Booking {
   specialInstructions?: string;
   elderly?: BookingElderlyInfo;
   caregiver?: BookingCaregiverInfo;
+  user?: {
+    fullName?: string;
+    profilePhoto?: string;
+  };
   visit?: BookingVisitInfo | null;
   createdAt: string;
   updatedAt: string;
