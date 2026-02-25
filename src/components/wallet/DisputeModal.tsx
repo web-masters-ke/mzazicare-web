@@ -159,7 +159,7 @@ export function DisputeModal({ isOpen, onClose, escrow, onSubmitted }: DisputeMo
               <Button
                 type="submit"
                 variant="danger"
-                loading={loading}
+                isLoading={loading}
                 className="flex-1"
               >
                 File Dispute

@@ -168,11 +168,25 @@ class MessagingSocketService {
 
   private handleConnectError(error: Error): void {
     console.error('WebSocket connection error:', error);
+
+    // Check if it's an authentication error
+    if (error.message?.includes('Authentication')) {
+      console.error('❌ WebSocket authentication failed. Token may be expired.');
+      // Don't attempt reconnect for auth errors - let the provider handle it
+      this.reconnectAttempts = this.maxReconnectAttempts;
+      return;
+    }
+
     this.attemptReconnect();
   }
 
   private handleError(error: any): void {
     console.error('WebSocket error:', error);
+
+    // Check if it's an authentication error
+    if (error.message?.includes('Authentication')) {
+      console.error('❌ WebSocket authentication error. Please refresh the page to reconnect.');
+    }
   }
 
   private attemptReconnect(): void {

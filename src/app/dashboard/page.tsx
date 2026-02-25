@@ -2,6 +2,7 @@
 
 import { ProtectedRoute } from '@/components/auth';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { NotificationBanner } from '@/components/NotificationBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { useBookings } from '@/hooks/useBookings';
 import { Button } from '@/components/ui';
@@ -35,6 +36,7 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-dark-950">
+      <NotificationBanner />
       <div className="pb-24 pt-8 px-4 sm:px-6">
         {/* Header */}
         <motion.div
@@ -160,7 +162,7 @@ function DashboardContent() {
                             {booking.elderly?.firstName} {booking.elderly?.lastName}
                           </h4>
                           <p className="text-sm text-dark-600 dark:text-dark-400">
-                            {new Date(booking.scheduledStartTime).toLocaleDateString('en-US', {
+                            {booking.scheduledStartTime && new Date(booking.scheduledStartTime).toLocaleDateString('en-US', {
                               month: 'short',
                               day: 'numeric',
                               hour: '2-digit',

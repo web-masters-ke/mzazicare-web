@@ -96,13 +96,9 @@ function MessagesContent() {
 
   useEffect(() => {
     if (user) {
-      messagingSocket.connect(localStorage.getItem('accessToken') || '');
+      // WebSocket connection is now handled globally by MessagingProvider
       fetchConversations();
     }
-
-    return () => {
-      messagingSocket.disconnect();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -261,7 +257,7 @@ function MessagesContent() {
     if (!editText.trim() || !editingMessageId) return;
 
     try {
-      await editMessage(editingMessageId, { content: editText });
+      await editMessage(editingMessageId, editText);
       setEditingMessageId(null);
       setEditText('');
     } catch (error) {
