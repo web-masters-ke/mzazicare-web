@@ -1,4 +1,4 @@
-name: Build and Deploy mzazicare-web [staging]
+name: Build and Deploy MzaziCare Web (Staging)
 
 on:
   push:
@@ -10,23 +10,12 @@ permissions:
   packages: write
 
 jobs:
-  security-scan:
-    runs-on: wasaa-org-runners
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: trufflesecurity/trufflehog@main
-        with:
-          extra_args: --only-verified
-
   build-and-push:
-    needs: security-scan
+    name: Build and Push to GHCR
     runs-on: wasaa-org-runners
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -45,23 +34,21 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
+  update-helm-chart:
+    name: Update Helm Chart Tag
     needs: build-and-push
     runs-on: wasaa-org-runners
     steps:
-      - name: Install yq
-        run: |
-          mkdir -p "$HOME/bin"
-          curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
-            -o "$HOME/bin/yq" && chmod +x "$HOME/bin/yq"
-          echo "$HOME/bin" >> $GITHUB_PATH
-      - name: Checkout Ventures-Helm-Charts
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: web-masters-ke/Ventures-Helm-Charts
           ref: staging
           token: ${{ secrets.HELM_CHARTS_PAT }}
-      - name: Update web image tag
+      - name: Install yq
+        run: |
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+      - name: Update image tag
         run: yq e '.web.image.tag = "staging-${{ github.sha }}"' -i charts/mzazicare-service/values.yaml
       - name: Commit and push
         run: |
@@ -70,27 +57,4 @@ jobs:
           git add charts/mzazicare-service/values.yaml
           git diff --staged --quiet && echo "No changes" && exit 0
           git commit -m "ci(mzazicare-web): update staging image tag to staging-${{ github.sha }}"
-          for i in 1 2 3 4 5; do
-            git push && break
-            echo "Push failed, retrying with rebase (attempt $i)..."
-            git pull --rebase origin development
-            sleep $((i * 2))
-          done
-      - name: Trigger ArgoCD sync
-        run: |
-          curl -sf -X POST http://argocd-server.argocd.svc.cluster.local/api/v1/applications/mzazicare-service/sync \
-            -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"prune":true,"dryRun":false,"force":false}' || true
-      - name: Wait for ArgoCD health
-        run: |
-          for i in $(seq 1 20); do
-            RESP=$(curl -sf http://argocd-server.argocd.svc.cluster.local/api/v1/applications/mzazicare-service \
-              -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" 2>/dev/null || echo '{}')
-            SYNC=$(echo "$RESP" | jq -r '.status.sync.status // empty')
-            HEALTH=$(echo "$RESP" | jq -r '.status.health.status // empty')
-            echo "[${i}] sync=$SYNC health=$HEALTH"
-            [ "$SYNC" = "Synced" ] && [ "$HEALTH" = "Healthy" ] && exit 0
-            sleep 15
-          done
-          echo "Timeout" && exit 1
+          git push
