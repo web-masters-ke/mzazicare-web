@@ -1,57 +1,96 @@
-name: Deploy MzaziCare Web
+name: Build and Deploy mzazicare-web
 
 on:
-  pull_request:
+  push:
     branches: [main]
-    types: [closed]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  build-and-deploy:
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+  security-scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: actions/checkout@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          fetch-depth: 0
+      - uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+  build-and-push:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/web-masters-ke/mzazicare-web:${{ github.sha }}
+            ghcr.io/web-masters-ke/mzazicare-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Build, tag, and push to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: mzazicare
-          IMAGE_TAG: latest
+  deploy:
+    needs: build-and-push
+    runs-on: wasaa-org-runners
+    steps:
+      - name: Install yq
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Deploy to Server via SSM
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          mkdir -p "$HOME/bin"
+          curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+            -o "$HOME/bin/yq" && chmod +x "$HOME/bin/yq"
+          echo "$HOME/bin" >> $GITHUB_PATH
+      - name: Checkout Ventures-Helm-Charts
+        uses: actions/checkout@v4
+        with:
+          repository: web-masters-ke/Ventures-Helm-Charts
+          ref: development
+          token: ${{ secrets.HELM_CHARTS_PAT }}
+      - name: Update web image tag
+        run: yq e '.web.image.tag = "${{ github.sha }}"' -i charts/mzazicare-service/values.yaml
+      - name: Commit and push
         run: |
-          aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
-            --document-name "AWS-RunShellScript" \
-            --timeout-seconds 600 \
-            --parameters "commands=[
-              \"echo 'Starting MzaziCare Web deployment...'\",
-              \"aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${ECR_REGISTRY}\",
-              \"docker pull ${ECR_REGISTRY}/mzazicare:latest\",
-              \"docker stop mzazicare-web 2>/dev/null || true\",
-              \"docker rm mzazicare-web 2>/dev/null || true\",
-              \"docker run -d --name mzazicare-web --restart unless-stopped --network mzazi-network -p 3001:3000 ${ECR_REGISTRY}/mzazicare:latest\",
-              \"sleep 10\",
-              \"docker ps --filter name=mzazicare-web --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'\",
-              \"curl -sf http://localhost:3001 && echo ' Web healthy' || echo 'Web not ready yet'\",
-              \"echo 'MzaziCare Web deployment complete'\"
-            ]" \
-            --region ${{ secrets.AWS_REGION }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add charts/mzazicare-service/values.yaml
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "ci(mzazicare-web): update image tag to ${{ github.sha }}"
+          for i in 1 2 3 4 5; do
+            git push && break
+            echo "Push failed, retrying with rebase (attempt $i)..."
+            git pull --rebase origin development
+            sleep $((i * 2))
+          done
+      - name: Trigger ArgoCD sync
+        run: |
+          curl -sf -X POST http://argocd-server.argocd.svc.cluster.local/api/v1/applications/mzazicare-service/sync \
+            -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"prune":true,"dryRun":false,"force":false}' || true
+      - name: Wait for ArgoCD health
+        run: |
+          for i in $(seq 1 20); do
+            RESP=$(curl -sf http://argocd-server.argocd.svc.cluster.local/api/v1/applications/mzazicare-service \
+              -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" 2>/dev/null || echo '{}')
+            SYNC=$(echo "$RESP" | jq -r '.status.sync.status // empty')
+            HEALTH=$(echo "$RESP" | jq -r '.status.health.status // empty')
+            echo "[${i}] sync=$SYNC health=$HEALTH"
+            [ "$SYNC" = "Synced" ] && [ "$HEALTH" = "Healthy" ] && exit 0
+            sleep 15
+          done
+          echo "Timeout" && exit 1
