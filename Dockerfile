@@ -10,6 +10,7 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV NEXT_PUBLIC_API_URL=NEXT_PUBLIC_API_URL_PLACEHOLDER
 RUN npm run build
 
 FROM base AS runner
@@ -24,4 +25,6 @@ USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+COPY entrypoint.sh ./
+RUN chmod +x entrypoint.sh
+CMD ["./entrypoint.sh"]
